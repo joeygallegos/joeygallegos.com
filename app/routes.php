@@ -25,31 +25,6 @@ $app->get('/style', HomeController::class . ':getStylePage')->setName('style-get
 $app->get('/portfolio/{descriptor}', ProjectController::class . ':getProjectPage')->setName('project');
 
 // ----------------------------------------------
-// PORTFOLIO ITEMS
-// ----------------------------------------------
-// $app->get('/portfolio/metall-electric', function($request, $response, $args) {
-// 	$project = Project::where('slug', '=', 'metall-electric')->first();
-// 	return $this->view->render($response, '/portfolio/metall-electric.twig', [
-// 		'header_space_after' => true,
-// 		'page_title' => 'Metall Electric | Joey Gallegos',
-// 		'project' => $project,
-// 		// 'stats' => $project->getStats,
-// 		// 'scopeItems' => $project->getScopeItems->chunk($project->getScopeItems->count() / 2)
-// 	]);
-// })->setName('portfolio-metall');
-
-// $app->get('/portfolio/evan-king-music', function($request, $response, $args) {
-// 	$project = Project::where('slug', '=', 'evan-king-music')->first();
-// 	return $this->view->render($response, '/portfolio/evan-king-music.twig', [
-// 		'header_space_after' => true,
-// 		'page_title' => 'Evan King | Joey Gallegos',
-// 		'project' => $project,
-// 		'stats' => $project->getStats,
-// 		'scopeItems' => $project->getScopeItems->chunk($project->getScopeItems->count() / 2)
-// 	]);
-// })->setName('portfolio-evan-king-music');
-
-// ----------------------------------------------
 // SOCIAL PAGE
 // ----------------------------------------------
 $app->get('/social', function ($request, $response, $args) {
