@@ -1,7 +1,11 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
 <html lang="en">
 	<head>
-		<title>{% if page.title is defined %}{{ page.title }}{% endif %}</title>
+		<title>
+			{% if page.title is defined %}
+				{{ page.title }}
+			{% endif %}
+		</title>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=0">
 
@@ -15,7 +19,7 @@
 		<meta name="theme-color" content="#2a80fc">
 
 		<meta name="author" content="Joey Gallegos - Developer">
-		<meta name="description" content="I'm a passionate developer who enjoys creating unique products &amp; experiences.">
+		<meta name="description" content="Personal website for Joey Gallegos. I'm passionate and skilled in web technologies, system operations and information security.">
 
 		<!-- OG -->
 		<meta property="og:title" content="Joey Gallegos - Developer">
@@ -29,7 +33,7 @@
 		<meta property="twitter:card" content="summary">
 		<meta property="twitter:title" content="Joey Gallegos - Developer">
 		<meta property="twitter:site" content="@_joeygallegos">
-		<meta property="twitter:description" content="I'm a passionate developer who enjoys creating unique products &amp; experiences.">
+		<meta property="twitter:description" content="Personal website for Joey Gallegos. I'm passionate and skilled in web technologies, system operations and information security.">
 		<meta property="twitter:image" content="https://joeygallegos.com/assets/img/meta/meta-card.png">
 
 		<meta name="robots" content="follow, index">
@@ -63,7 +67,9 @@
 		<script async src="https://www.googletagmanager.com/gtag/js?id=UA-53863854-1"></script>
 		<script>
 			window.dataLayer = window.dataLayer || [];
-			function gtag(){dataLayer.push(arguments);}
+			function gtag() {
+				dataLayer.push(arguments);
+			}
 			gtag('js', new Date());
 			gtag('config', 'UA-53863854-1');
 		</script>
