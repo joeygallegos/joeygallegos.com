@@ -3,7 +3,7 @@
 		"paragonie/random-lib": "^2.0",
 		"php": ">=7.0.0",
 		"zeuxisoo/slim-whoops": "^0.6.5",
-		"illuminate/database": "^5.5.44",
+		"illuminate/database": "6.20.26",
 		"monolog/monolog": "^1.23",
 		"scssphp/scssphp": "1.1.0",
 		"mailgun/mailgun-php": "^2.8.0",
