@@ -1,0 +1,118 @@
+{% extends '/portfolio/template/portfolio-project.twig' %}
+{% block aboutProject %}
+
+<section id="about-project" class="reveal">
+	<div class="container">
+		<div class="row center-xs center-sm center-md center-lg">
+			<div class="col-xs-12 col-sm-12 col-md-8 col-lg-10">
+				<h1>Metall Electric</h1>
+				{% if not project.tags is empty %}
+					<div class="tags">
+						{% for tag in project.tags|split(',') %}
+							<div class="bubble">{{ tag|upper }}</div>
+						{% endfor %}
+					</div>
+				{% endif %}
+				{% if project.description %}
+					{{ project.description | raw }}
+				{% endif %}
+			</div>
+		</div>
+	</div>
+</section>
+
+{# <section id="">
+	<div class="container">
+		<div class="row center-xs center-sm center-md center-lg">
+			<div class="col-xs-12 col-sm-12 col-md-8 col-lg-10">
+				<div class="video-container">
+					<iframe src="https://www.youtube.com/embed/9fvcmyTIB1k?rel=0&amp;showinfo=0&amp;controls=0&amp;hd=1&amp;vq=highres&amp;color=white&amp;autohide=1" frameborder="0"></iframe>
+				</div>
+
+				<blockquote>
+					<p>Quick video concept for logo</p>
+				</blockquote>
+			</div>
+		</div>
+	</div>
+</section> #}
+
+<section class="reveal">
+	<div class="container">
+		<div class="row center-xs center-sm center-md center-lg center-xs center-sm middle-lg space-after">
+			<div class="col-xs-12 col-sm-12 col-md-10 col-lg-10">
+				<div class="parent" style="display: flex; flex-direction: column;justify-content: center; resize: vertical;">
+					<h2>Converting Concept to Product</h2>
+					<p>Together we created a straightforward and consistent user experience for new and returning customers that is easy to use. The overall viewing experience of the website was designed to be fast and simple on every device as well as highlight important content - such as the services offered or previous customers.</p>
+				</div>
+			</div>
+		</div>
+
+		{% set screenshots = [
+			'/assets/img/wrk/metall_electric_homepage_code.png',
+			'/assets/img/wrk/metall_electric_homepage_full.png']
+		%}
+		{% for screenshot in screenshots %}
+			<div class="row center-xs center-sm center-md center-lg center-xs center-sm middle-lg space-after">
+				<div class="col-xs-12 col-sm-12 col-md-11 col-lg-11">
+					<div class="shot">
+						<img class="shadow rounded reveal" src="{{ screenshot }}" alt="">
+					</div>
+				</div>
+			</div>
+		{% endfor %}
+	</div>
+</section>
+
+<section class="mobile reveal">
+	<div class="container">
+
+		<div class="row center-xs center-sm center-md center-lg center-xs center-sm middle-lg">
+			<div class="col-xs-12 col-sm-12 col-md-5 col-lg-5">
+				<div class="shot">
+					<img class="shadow reveal" src="/assets/img/wrk/metall_electric_phone.png" alt="">
+				</div>
+			</div>
+
+			<div class="col-xs-12 col-sm-12 col-md-7 col-lg-7">
+				<div class="info">
+					<h2>Mobile Experience</h2>
+					<p>A mobile-friendly experience is very important for customers that are on-the-go. We quickly exposed the lacking experience of the in-progress website and created a detailed design that solved every shortcoming of the mobile website. This helped to differentiate Metall Electric in a list of competitors.</p>
+				</div>
+			</div>
+		</div>
+
+	</div>
+</section>
+
+
+<section class="thought reveal">
+	<div class="container">
+
+		<div class="row center-xs center-sm center-md center-lg center-xs center-sm middle-lg left-text">
+			<div class="col-xs-12 col-sm-12 col-md-10 col-lg-10">
+				<div class="info">
+					<h2>Design Challenges</h2>
+					<p>At Metall Electric, I helped to increase acquisition of customers by creating a website using deep insights with opportunity analysis. When publishing this website online, we faced several challenges such as defining how the content should be displayed on the website. Once the website was available for all, we did so with high quality content while at the same time continuing to get feedback from internal and external users.</p>
+
+					<p>During this project, I learned that one of the key importance is to always start with gathering user research to guide the design and implementation decisions. We now collect basic demographic information to help us drive the future changes we make to the websites functionality and navigation.</p>
+
+					<p>The hardest challenge was not only how to differentiate Metall Electric in a list of competitors, but how to convey the work ethic and passion for helping customers <mark>achieve their goals</mark>.</p>
+				</div>
+			</div>
+
+			<div class="col-xs-12 col-sm-12 col-md-11 col-lg-11">
+				<div class="shot">
+					<img class="shadow" src="/assets/img/wrk/metall_electric_thought.png" alt="Focusing on Design Challenges">
+				</div>
+			</div>
+		</div>
+
+	</div>
+</section>
+
+{% include '/portfolio/partials/testimony.twig' %}
+{% include '/portfolio/partials/scope-of-work.twig' %}
+{% include '/portfolio/partials/see-more.twig' %}
+
+{% endblock %}

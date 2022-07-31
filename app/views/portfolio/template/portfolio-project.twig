@@ -1,0 +1,77 @@
+{% extends 'layout.twig' %}
+{% block body %}
+
+{% if not stats is empty %}
+<section id="stats" class="reveal">
+	<div class="container">
+
+		<!-- grid layout -->
+		<div class="row center-xs center-sm center-md center-lg">
+			<div class="col-xs-12 col-sm-12 col-md-8 col-lg-10">
+				
+				<!-- content -->
+				<h1 class="white" class="animated fadeInUp">Project Statistics</h1>
+				<div class="row center-xs center-sm center-md center-lg">
+
+					<!-- stat -->
+					{% for stat in stats %}
+					<div class="col-xs-11 col-sm-12 col-md-4 col-lg-4">
+						<div class="stat reveal" data-stat-id="{{ stat.id }}" data-stat-value="{{ stat.value }}">
+							<div class="details">
+								<div class="desc">
+									{{ stat.display_name }}
+								</div>
+								<div class="num">
+									0
+								</div>
+							</div>
+						</div>
+					</div>
+					{% endfor %}
+				</div>
+
+			</div>
+		</div>
+
+	</div>
+</section>
+{% endif %}
+
+{# output project-specific code #}
+{% block aboutProject %}{% endblock %}
+
+<main id="project-shots" class="reveal" hide>
+	<div class="container" class="">
+
+		<section>
+			<div class="row center-xs center-sm center-md center-lg">
+				<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+					<img class="shadow" src="/assets/img/draw.jpg" alt="drawing">
+					<blockquote>
+						<p>A look at the process behind the wireframing of each page</p>
+					</blockquote>
+				</div>
+			</div>
+		</section>
+
+		<section class="reveal">
+			<div class="row center-xs center-sm center-md center-lg">
+				<div class="col-xs-12 col-sm-12 col-md-8 col-lg-8">
+					<h1 class="light">Concept, Strategy &amp; Assembly</h1>
+					<h2 class="light">We started exploration on the user experience and pain point discovery. We looked for a strategy to fix the problem by producing wireframes and design sketches. The end result was a simple, colorful and easy to use online experience.</h2>
+				</div>
+			</div>
+		</section>
+
+		<section class="reveal">
+			<div class="row center-xs center-sm center-md center-lg">
+				<div class="col-xs-12 col-sm-12 col-md-8 col-lg-8">
+					<h2>AdminTools</h2>
+					<h3>Using custom created software, AdminTools provides user analytics, endless website configuration and system monitoring. This also includes integration with helpful tools such as Google Analytics and Mailgun for email notifications.</h3>
+				</div>
+			</div>
+		</section>
+
+	</div>
+</main>
+{% endblock %}

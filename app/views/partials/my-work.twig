@@ -1,0 +1,56 @@
+<section id="my-work-header" class="wow fadeInUp">
+	<div class="row center-xs center-sm center-md center-lg">
+
+		<div class="col-xs-11 col-sm-11 col-md-8 col-lg-6">
+			<h2>My Recent Work</h2>
+			<p>Here you will find my selected client work which consists mainly of web and mobile based experiences.</p>
+		</div>
+
+	</div>
+</section>
+
+<section id="my-work-items" class="work">
+	{% set offset = false %}
+	{% for project in projects %}
+	<div class="row center-xs center-sm middle-lg left-text">
+		{% if offset %}
+		{% set offset = false %}
+		<div class="col-xs-11 col-sm-12 col-md-5 col-lg-5 wow slideInLeft">
+			<div class="item">
+				<a href="{{ project.link }}" target="_blank">
+					<img class="shadow" src="{{ project.image }}" alt="">
+				</a>
+			</div>
+		</div>
+		<div class="col-xs-11 col-sm-12 col-md-7 col-lg-7 wow slideInRight">
+			<div class="item">
+				<h2>{{ project.title }}</h2>
+				<p>{{ project.short_description|e }}</p>
+				<div class="button-cta">
+					<a href="{{ project.link }}" target="_blank" class="btn blue shadow">View More</a>
+				</div>
+			</div>
+		</div>
+		{% else %}
+		{% set offset = true %}
+		<div class="col-xs-11 col-sm-12 col-md-7 col-lg-7 wow slideInLeft">
+			<div class="item">
+				<h2>{{ project.title }}</h2>
+				<p>{{ project.short_description|e }}</p>
+				<div class="button-cta">
+					<a href="{{ project.link }}" target="_blank" class="btn blue shadow">View More</a>
+				</div>
+			</div>
+		</div>
+		<div class="col-xs-11 col-sm-12 col-md-5 col-lg-5 col-first-mobile wow slideInRight">
+			<div class="item">
+				<a href="{{ project.link }}" target="_blank">
+					<img class="shadow" src="{{ project.image }}">
+				</a>
+			</div>
+		</div>
+		{% endif %}
+	</div>
+	{% endfor %}
+
+</section>

@@ -1,0 +1,20 @@
+{% if project.view_link %}
+<section id="view-it" class="reveal">
+	<div class="container">
+		{# <div class="row center-xs center-sm center-md center-lg center-xs center-sm middle-lg">
+			<div class="col-xs-12 col-sm-12 col-md-7 col-lg-7">
+				<div class="info">
+					<h2>Like What You See?</h2>
+				</div>
+			</div>
+		</div> #}
+
+		<div class="row center-xs center-sm center-md center-lg">
+			<a href="{{ project.view_link }}" target="_blank" class="btn blue shadow with-icon">
+				<span class="eye">&nbsp;</span>
+				VIEW THIS PROJECT LIVE
+			</a>
+		</div>
+	</div>
+</section>
+{% endif %}

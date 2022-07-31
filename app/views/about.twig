@@ -1,0 +1,62 @@
+{% extends 'layout.twig' %}
+
+{% block body %}
+<section id="about-me" class="reveal">
+	<div class="container">
+		<div class="row center-xs center-sm left-text">
+
+			<div class="col-xs-11 col-sm-11 col-md-10 col-lg-10">
+				<h1>About Me</h1>
+				<p>👋Hi! I'm Joey, a web developer from Houston, Texas. I'm skilled in frontend and backend web development while staying focused on enhancing the customer's experience. I help small businesses, startups and clients of all sizes to create memorable products &amp; experiences for their customers and visitors.</p>
+
+				<p>I love working with customers of all types with unique businesses and ideas - below you can see what they said about working with me:</p>
+				
+				<br>
+				<blockquote>
+					{# <p>Joe is dependable, professional, creative, and has always delivered within tight schedules and budget. As a designer, he is not shy to present his creative ideas and always brings a different perspective to the table. He's also a great team player and his enthusiasm is contagious!</p> #}
+					<p>Joey is endlessly helpful, flexible, and always quick to respond. His quality of work has gone far beyond my expectations. The end result was a very sophisticated website that looks amazing, has excellent functionality and gives our customers that experience we wanted them to have while working with us. We look forward to working with him again in the future.</p>
+				</blockquote>
+				<p class="" style="white-space:pre-wrap;">
+					<strong>Jaushua Fredzess</strong>, Founder and Owner of <a href="https://www.metallelectric.com/" target="_blank">Metall Electric</a>
+				</p>
+				
+				<br>
+
+				<blockquote>
+					{# <p>Joe is dependable, professional, creative, and has always delivered within tight schedules and budget. As a designer, he is not shy to present his creative ideas and always brings a different perspective to the table. He's also a great team player and his enthusiasm is contagious!</p> #}
+					<p>"Joey has been my go-to web developer for the better part of the past decade, and I can confidently say that MDK wouldn't be what it is today without all of his hard work. He built an extremely user-friendly website for my fans to download my music, and I couldn't be happier with how efficiently it works. Joey has great communication skills, and an incredibly strong work ethic. Whether I'm asking for general information, or desperately calling him at midnight to say I broke something in the back end (true story), he always has my back."</p>
+				</blockquote>
+				<p class="" style="white-space:pre-wrap;">
+					<strong>Morgan King</strong>, Content Creator - also known as <a href="https://www.morgandavidking.com/" target="_blank">MDK</a>
+				</p>
+				
+				<br>
+
+				<blockquote>
+					{# <p>Joe is dependable, professional, creative, and has always delivered within tight schedules and budget. As a designer, he is not shy to present his creative ideas and always brings a different perspective to the table. He's also a great team player and his enthusiasm is contagious!</p> #}
+					<p>"Joey has twice now been able to turn my mediocre mockups into websites that not only meet, but exceed my expectations. Communication and collaboration skills are on point here, 10/10."</p>
+				</blockquote>
+				<p class="" style="white-space:pre-wrap;">
+					<strong>Evan King</strong>, Content Creator - also known as <a href="https://joeygallegos.com/portfolio/evan-king-music" target="_blank">Evan King Music</a>
+				</p>
+				
+				<br>
+				<p>Below are some of the services I provide to my customers:</p>
+				{% set values = ['Research & Analytics', 'Project Consultation', 'Product Design', 'Web Design', 'Web Development & Integration', 'Security & Hardening', 'Application Support & Maintenance'] %}
+				{% set int = 1 %}
+				<ul class="core-services">
+					{% for value in values %}
+						<li class="core-service-item" style="opacity: 1; transform: matrix(1, 0, 0, 1, 0, 0);">
+							<span>{{ int }} — </span><strong itemprop="serviceType">{{ value }}</strong>
+						</li>
+					{% set int = int + 1 %}
+					{% endfor %}
+				</ul>
+				<p><mark>Don't see what you're looking for listed here?</mark> I still might be able to help you with your need. Please <a target="_blank" href="{{ path_for('contact-get') }}">contact me</a> with more information.</p>
+				{# <p><a href="https://www.paypal.com/paypalme/joeygallegos" target="_blank">buy me a coffee</a></p> #}
+			</div>
+
+		</div>
+	</div>
+</section>
+{% endblock %}

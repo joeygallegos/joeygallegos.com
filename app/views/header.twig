@@ -1,0 +1,39 @@
+<!-- header -->
+<header id="header" class="reveal {% if header_space_after == false %}no-space-after{% endif %}" hide>
+	<div class="container">
+		<div class="row">
+			<div class="col-md-8 col-lg-8">
+				<a href="/">
+					{# <img src="/assets/img/new-logo.png" alt="" class="logo"> #}
+					<img src="/assets/img/logo.svg" alt="Joey Gallegos" class="logo" style="">
+				</a>
+				<nav>
+					
+					
+					
+				</nav>
+			</div>
+		</div>
+	</div>
+</header>
+
+<header id="header-v2" class="reveal {% if header_space_after == false %}no-space-after{% endif %}">
+	<div class="contain">
+		<div class="nested-columns">
+			<div class="logo">
+				<a href="/">
+					<img src="/assets/img/logo.svg" alt="Joey Gallegos" class="logo" style="">
+				</a>
+			</div>
+
+			<nav id="links">
+				<ul>
+					<li><a href="{{ path_for('about-get') }}">ABOUT</a></li>
+					<li><a href="{{ path_for('experience-get') }}">EXPERIENCE</a></li>
+					<li><a href="{{ path_for('contact-get') }}">CONTACT</a></li>
+					<li><a href="{{ path_for('faq-get') }}">FAQ</a></li>
+				</ul>
+			</nav>
+		</div>
+	</div>
+</header>

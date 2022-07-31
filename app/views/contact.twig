@@ -1,0 +1,122 @@
+{% extends 'layout.twig' %}
+{% block body %}
+
+{% include 'error.twig' %}
+
+<section id="contact" class="reveal">
+	<div class="container">
+		<div class="row center-xs center-sm left-text">
+			<div class="col-xs-11 col-sm-11 col-md-5 col-lg-5">
+				<h1>Contact</h1>
+				<p>Don't be a stranger - let’s do something awesome together.</p>
+				<p>Feel free to get in touch with me. I am always open to discussing new projects, ideas or opportunities to be part of your visions.</p>
+				<p>Please fill out the form so I can learn more about you, your company and your needs.</p>
+				{# <p><pre>{{ data | json_encode }}</pre></p> #}
+			</div>
+
+			<div class="col-xs-11 col-sm-11 col-md-6 col-lg-6 col-md-offset-1 col-lg-offset-1">
+				<form accept-charset="UTF-8" method="post" enctype="multipart/form-data" action="{{ path_for('contact-post', {'hash': backend.post_request_obfuscation_hash}) }}" autocomplete="off" novalidate>
+					
+					{# {% if config. %}
+						<input type="text" name="{{ backend.post_request_obfuscation_hash }}" tabindex="-1" value="{{ backend.post_request_obfuscation_hash }}">
+						<input type="text" name="{{ backend.post_request_ready_at }}" tabindex="-1" value="{{ backend.post_request_ready_at }}">
+					{% endif %} #}
+
+					{# NAME AND ORGNAME #}
+					<div class="row form-group">
+						<div class="half left">
+							<div class="input-section {% if errors.name is defined %} error {% endif %}">
+								<label>Your full name</label>
+								{% if errors.name is defined %}
+									<div class="error" for="name">{{ errors.name | first }}</div>
+								{% endif %}
+								<input type="text" name="name" placeholder="John Doe" autocomplete="off" {% if old_params.name is defined %} value="{{ old_params.name }}" {% endif %} title="What's your name?">
+							</div>
+						</div>
+
+						<div class="half right">
+							<div class="input-section {% if errors.orgname is defined %} error {% endif %}">
+								<label>Your organization name</label>
+								{% if errors.orgname is defined %}
+									<div class="error" for="orgname">{{ errors.orgname | first }}</div>
+								{% endif %}
+								<input type="text" name="orgname" placeholder="Organization Name" autocomplete="off" {% if old_params.orgname is defined %} value="{{ old_params.orgname }}" {% endif %} title="What's your organization name?">
+							</div>
+						</div>
+					</div>
+
+					{# PHONE AND EMAIL #}
+					<div class="row form-group">
+						<div class="half left">
+							<div class="input-section {% if errors.phone is defined %} error {% endif %}">
+								<label>Your phone number</label>
+								{% if errors.phone is defined %}
+									<div class="error" for="phone">{{ errors.phone | first }}</div>
+								{% endif %}
+								<input type="text" name="phone" placeholder="Phone Number" autocomplete="off" {% if old_params.phone is defined %} value="{{ old_params.phone }}" {% endif %} title="What's your phone number?">
+							</div>
+						</div>
+						<div class="half right">
+							<div class="input-section {% if errors.email is defined %} error {% endif %}">
+								<label>Your email address</label>
+								{% if errors.email is defined %}
+									<div class="error" for="email">{{ errors.email | first }}</div>
+								{% endif %}
+								<input type="text" name="email" placeholder="Email Address" autocomplete="off" {% if old_params.email is defined %} value="{{ old_params.email }}" {% endif %} title="What's your email address?">
+							</div>
+						</div>
+					</div>
+
+					{# LOCATION AND WHAT #}
+					<div class="row form-group">
+						<div class="half left">
+							<div class="input-section {% if errors.location is defined %} error {% endif %}">
+								<label>Your location</label>
+								{% if errors.location is defined %}
+									<div class="error" for="location">{{ errors.location | first }}</div>
+								{% endif %}
+								<input type="text" name="location" placeholder="Where are you located?" autocomplete="off" {% if old_params.location is defined %} value="{{ old_params.location }}" {% endif %} title="Where are you located?">
+							</div>
+						</div>
+						<div class="half right">
+							<div class="input-section {% if errors.what is defined %} error {% endif %}">
+								<label>What can we help you with?</label>
+								{% if errors.what is defined %}
+									<div class="error" for="what">{{ errors.what | first }}</div>
+								{% endif %}
+								<input type="text" name="what" placeholder="What can we help you with?" autocomplete="off" {% if old_params.what is defined %} value="{{ old_params.what }}" {% endif %} title="What can we help you with?">
+							</div>
+						</div>
+					</div>
+
+					{# FREE-HAND TEXT #}
+					<div class="row form-group">
+						<div class="input-section {% if errors.message is defined %} error {% endif %}">
+							<label>Your message</label>
+							{% if errors.message is defined %}
+								<div class="error" for="message">{{ errors.message | first }}</div>
+							{% endif %}
+							<textarea cols="30" rows="5" name="message" class="noresize" placeholder="Tell me a bit about your project, timeline, and budget">{{ old_params.message }}</textarea>
+						</div>
+					</div>
+
+					{# SPAM CHECK #}
+					<div class="form-group" style="display:none;">
+						<div class="input-section" style="position: absolute; left: -5000px;" aria-hidden="true">
+							<input type="text" name="_honey" tabindex="-1" value="">
+							<input type="text" name="abstraction" tabindex="-1" value="other-form">
+							{% if errors._honey is defined %}
+								<div class="error" for="_honey">{{ errors._honey | first }}</div>
+							{% endif %}
+						</div>
+					</div>
+
+					<div class="row form-group">
+						<button class="btn blue shadow">SEND MESSAGE</button>
+					</div>
+				</form>
+			</div>
+		</div>
+	</div>
+</section>
+{% endblock %}

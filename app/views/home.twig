@@ -1,0 +1,12 @@
+{% extends 'layout.twig' %}
+
+{% block body %}
+	<div class="container">
+		{% include 'partials/home-about-me.twig' %}
+		{% include 'partials/my-work.twig' %}
+		{% include 'partials/development-overview.twig' %}
+	</div>
+
+	{% include 'partials/quote.twig' %}
+	{% include 'partials/footer.twig' %}
+{% endblock %}

@@ -1,0 +1,81 @@
+{% extends '/portfolio/template/portfolio-project.twig' %}
+{% block aboutProject %}
+
+<section id="about-project" class="animated fadeIn">
+	<div class="container" class="">
+		<div class="row center-xs center-sm center-md center-lg">
+
+			<div class="col-xs-12 col-sm-12 col-md-8 col-lg-10">
+				<h1>Evan King Music</h1>
+				{% if not project.tags is empty %}
+					<div class="tags">
+						{% for tag in project.tags|split(',') %}
+							<div class="bubble">{{ tag|upper }}</div>
+						{% endfor %}
+					</div>
+				{% endif %}
+				{% if project.description %}
+					{{ project.description | raw }}
+				{% endif %}
+			</div>
+			
+		</div>
+	</div>
+</section>
+
+<main id="upsells" class="reveal" hide>
+	<div class="container" class="">
+
+		<section class="reveal">
+			<div class="row center-xs center-sm center-md center-lg center-xs center-sm middle-lg">
+
+				<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+					<img class="shadow" src="/assets/img/wrk/evan_king_homepage_full.jpg" alt="drawing">
+					<blockquote>
+						<p>Fully detailed design mock of the website's homepage</p>
+					</blockquote>
+				</div>
+			</div>
+		</section>
+	</div>
+</main>
+
+
+<main id="upsells" class="reveal">
+	<div class="container">
+
+		<section class="reveal">
+			<div class="row center-xs center-sm center-md center-lg center-xs center-sm middle-lg space-after">
+				<div class="col-xs-12 col-sm-12 col-md-10 col-lg-10">
+					<div class="parent" style="display: flex; flex-direction: column;justify-content: center; resize: vertical;">
+						<h2>Converting Concept to Product</h2>
+						<p>I focused on creating an easy-to-use design with clean and understandable interactions that made the overall viewing experience of the website fast and simple.</p>
+					</div>
+				</div>
+			</div>
+
+			{% set screenshots = [
+				'/assets/img/wrk/evan_king_homepage_full_1.png',
+				'/assets/img/wrk/evan_king_contact_page.png',
+				'/assets/img/wrk/evan_king_homepage_full.jpg',
+				'/assets/img/wrk/evan_king_homepage_full_real.png']
+			%}
+			{% for screenshot in screenshots %}
+				<div class="row center-xs center-sm center-md center-lg center-xs center-sm middle-lg space-after">
+					<div class="col-xs-12 col-sm-12 col-md-11 col-lg-11">
+						<div class="shot">
+							<img class="shadow rounded reveal" src="{{ screenshot }}" alt="">
+						</div>
+					</div>
+				</div>
+			{% endfor %}
+		</section>
+
+	</div>
+</main>
+
+{% include '/portfolio/partials/testimony.twig' %}
+{% include '/portfolio/partials/scope-of-work.twig' %}
+{% include '/portfolio/partials/see-more.twig' %}
+
+{% endblock %}

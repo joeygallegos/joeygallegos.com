@@ -1,0 +1,20 @@
+<section id="development-overview" class="wow fadeInUp">
+	<div class="row center-xs center-sm center-md center-lg">
+		<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+			<h2>Development Overview</h2>
+			<p>A brief overview of the steps I take to your bring products to life on the web. We'll work together to create designs and interactions that attract more customers and influence your business partners. Together we'll find innovation in unexpected areas.</p>
+		</div>
+	</div>
+
+	<div class="row center-xs center-sm center-md center-lg wow fadeInUp">
+		{% for step in steps %}
+		<div class="col-xs-12 col-sm-12 col-md-12 col-lg-4 step">
+			<div class="icon">
+				<img src="/assets/img/svg/{{ step.id }}.svg" alt="{{ step.header|e }}" class="ico">
+			</div>
+			<h3>{{ step.header|e }}</h3>
+			<p>{{ step.description|e }}</p>
+		</div>
+		{% endfor %}
+	</div>
+</section>

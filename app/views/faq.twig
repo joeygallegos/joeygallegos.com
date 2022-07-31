@@ -1,0 +1,41 @@
+{% extends 'layout.twig' %}
+
+{% block body %}
+<section id="questions" class="reveal">
+	<div class="container">
+		<div class="row center-xs center-sm left-text">
+
+			<div class="col-xs-11 col-sm-11 col-md-10 col-lg-10">
+				<h1>Frequently Asked Questions</h1>
+				<p>Are you intrested in my services? Welcome! I've created this list of common questions to help you find the answers to your questions.</p>
+
+				<br><hr><br>
+
+				{#<ul class=>
+					{% for item in questionItems %}
+						<li><strong>{{ item.question }}</strong>
+							<ul>
+								<li>
+									{{ item.answer }}
+								</li>
+							</ul>
+						</li>
+					{% endfor %}
+				</ul>#}
+
+				{% for item in questionItems %}
+					<ul class="no-padding">
+						<li><strong>{{ item.question }}</strong></li>
+						<li>{{ item.answer }}</li>
+					</ul>
+				{% endfor %}
+
+				<br><hr><br>
+
+				<p><mark>Are you not seeing your question here?</mark> Use my <a href="{{ path_for('contact-get') }}">contact page</a> and ask the question that way.</p>
+			</div>
+
+		</div>
+	</div>
+</section>
+{% endblock %}

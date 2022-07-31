@@ -1,0 +1,23 @@
+{% if not scopeItems is empty %}
+<section class="reveal">
+	<div class="container">
+
+		<div class="row center-xs center-sm center-md center-lg middle-lg">
+			<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+				<h2>Scope of Work</h2>
+			</div>
+
+			{% for list in scopeItems %}
+			<div class="col-xs-12 col-sm-12 col-md-5 col-lg-3">
+				<ul class="list">
+					{% for item in list %}
+						<li class="reveal"><p>{{ item.description }}</p></li>
+					{% endfor %}
+				</ul>
+			</div>
+			{% endfor %}
+		</div>
+
+	</div>
+</section>
+{% endif %}

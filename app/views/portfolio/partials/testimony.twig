@@ -1,0 +1,18 @@
+{% if not testimony is empty %}
+<section id="testimony" class="reveal">
+	<div class="container">
+		<div class="row center-xs center-sm center-md center-lg middle-lg">
+
+			<div class="col-xs-12 col-sm-12 col-md-10 col-lg-10">
+				<div class="info">
+					<blockquote>
+						<p>{{ testimony.quote }}</p>
+					</blockquote>
+					<p class="" style="white-space: pre-wrap;"><strong>{{ testimony.who }}</strong>, {{ testimony.title }}</p>
+				</div>
+			</div>
+
+		</div>
+	</div>
+</section>
+{% endif %}

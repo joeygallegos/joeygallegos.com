@@ -1,0 +1,76 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html lang="en">
+	<head>
+		<title>{% if page.title is defined %}{{ page.title }}{% endif %}</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=0">
+
+		<!-- Favicon -->
+		<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+		<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+		<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+		<link rel="manifest" href="/site.webmanifest">
+		<link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5">
+		<meta name="msapplication-TileColor" content="#da532c">
+		<meta name="theme-color" content="#2a80fc">
+
+		<meta name="author" content="Joey Gallegos - Developer">
+		<meta name="description" content="I'm a passionate developer who enjoys creating unique products &amp; experiences.">
+
+		<!-- OG -->
+		<meta property="og:title" content="Joey Gallegos - Developer">
+		<meta property="og:type" content="website">
+		<meta property="og:description" content="I'm a passionate developer who enjoys creating unique products &amp; experiences.">
+		<meta property="og:url" content="https://joeygallegos.com">
+		<meta property="og:image" content="https://joeygallegos.com/assets/img/meta/meta-card.png">
+		<meta name="keywords" content="web development,joey gallegos,clients,users,experience,business,music,showcase,started,work,development,web,design,product,evan,find,help,joey">
+
+		<!-- Twitter -->
+		<meta property="twitter:card" content="summary">
+		<meta property="twitter:title" content="Joey Gallegos - Developer">
+		<meta property="twitter:site" content="@_joeygallegos">
+		<meta property="twitter:description" content="I'm a passionate developer who enjoys creating unique products &amp; experiences.">
+		<meta property="twitter:image" content="https://joeygallegos.com/assets/img/meta/meta-card.png">
+
+		<meta name="robots" content="follow, index">
+		<meta name="revisit-after" content="3 month">
+		{# <link rel="canonical" href="https://joeygallegos.com"> #}
+
+		<meta name="msapplication-tap-highlight" content="no">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+		<!-- prefetch -->
+		<link rel="dns-prefetch" href="//fonts.googleapis.com">
+		<link rel="dns-prefetch" href="//cdnjs.cloudflare.com">
+
+		<!-- fonts -->
+		<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Karla:400,700|Montserrat:100,300,400,500">
+
+		<!-- animate.css -->
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css">
+		<link rel="stylesheet" href="/assets/css/grid.css">
+		<link rel="stylesheet" href="/assets/css/reset.css">
+		<link rel="stylesheet" href="/assets/css/style.css">
+
+		<!-- cloudflare -->
+		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+		<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/scrollReveal.js/4.0.5/scrollreveal.min.js"></script>
+
+		<!-- local -->
+		<script type="text/javascript" src="/assets/scripts/main.js"></script>
+
+		<!-- Google Analytics -->
+		<script async src="https://www.googletagmanager.com/gtag/js?id=UA-53863854-1"></script>
+		<script>
+			window.dataLayer = window.dataLayer || [];
+			function gtag(){dataLayer.push(arguments);}
+			gtag('js', new Date());
+			gtag('config', 'UA-53863854-1');
+		</script>
+	</head>
+	<body>
+		{# {% include 'bar.twig' %} #}
+		{% include 'header.twig' %}
+		{% block body %}{% endblock %}
+	</body>
+</html>
