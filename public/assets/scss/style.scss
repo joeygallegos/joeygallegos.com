@@ -397,10 +397,30 @@ div.row>div[class*='col-'].collapse {
 }
 
 // ----------------------------------------------
-// SECTION DESIGN
+// SECTION STYLES
 // ----------------------------------------------
 section {
-	margin: 0 0 4.5rem 0;
+	padding: 4.5rem 0;
+
+	&.smaller {
+		padding: 2.5rem 0;
+	}
+
+	&.bottom-only-small {
+		padding: 0 0 2.5rem 0;
+	}
+
+	&.no-bottom {
+		padding-bottom: 0;
+	}
+
+	&.no-top {
+		padding-top: 0;
+	}
+
+	&.no-padding {
+		padding: 0;
+	}
 }
 
 // ----------------------------------------------
