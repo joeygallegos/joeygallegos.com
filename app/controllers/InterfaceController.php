@@ -26,9 +26,11 @@ class InterfaceController extends BaseController
 		$session = $spotify['session'];
 		$api = $spotify['api'];
 
+		$nowPlaying = null;
 		try {
 			$nowPlaying = $api->getMyCurrentTrack();
 		} catch (SpotifyWebAPIException $ex) {
+			$nowPlaying = null;
 			$this->log('info', __FUNCTION__, 'Exception from the Spotify API');
 			$this->log('info', __FUNCTION__, $ex->getMessage());
 		}
@@ -43,15 +45,18 @@ class InterfaceController extends BaseController
 			],
 			'new-uuid' => Uuid::uuid4(),
 			'flashes' => $this->container->flash->getFirstMessage('data'),
-			'now-playing' => [
+		];
+
+		$debugData['now-playing'] = null;
+		if (!is_null($nowPlaying)) {
+			$debugData['now-playing'] = [
 				'artist_name' => $nowPlaying->item->album->artists,
 				'album' => [
 					'image' => $nowPlaying->item->images,
 					'name' => $nowPlaying->item->name
 				]
-			],
-			'raw' => $nowPlaying
-		];
+			];
+		}
 		return $response->withHeader('Content-Type', 'application/json')->withJson($debugData, 200, JSON_PRETTY_PRINT);
 	}
 
@@ -81,8 +86,7 @@ class InterfaceController extends BaseController
 					'type' => 'success',
 					'message' => 'test flash message'
 				]
-			],
-			// 'config' => Config::all()
+			]
 		];
 
 		$this->log('info', __FUNCTION__, 'Test page request pinged');
