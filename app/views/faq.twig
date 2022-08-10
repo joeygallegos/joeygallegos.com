@@ -11,18 +11,6 @@
 
 				<br><hr><br>
 
-				{#<ul class=>
-					{% for item in questionItems %}
-						<li><strong>{{ item.question }}</strong>
-							<ul>
-								<li>
-									{{ item.answer }}
-								</li>
-							</ul>
-						</li>
-					{% endfor %}
-				</ul>#}
-
 				{% for item in questionItems %}
 					<ul class="no-padding">
 						<li><strong>{{ item.question }}</strong></li>

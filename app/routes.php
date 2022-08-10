@@ -1,6 +1,5 @@
 <?php
 
-use App\Models\Project;
 use App\Controllers\HomeController;
 use App\Controllers\ContactController;
 use App\Controllers\ProjectController;
@@ -36,11 +35,11 @@ $app->get('/social', function ($request, $response, $args) {
 // ----------------------------------------------
 $app->get('/contact-me', ContactController::class . ':getContactPage')
 	->setName('contact-get')
-	->add(new SetFormSpam($app->getContainer()));
+	->add(new SetFormSpam($container));
 
 $app->post('/contact/{hash}', ContactController::class . ':postContactPage')
 	->setName('contact-post')
-	->add(new CheckFormSpam($app->getContainer()));
+	->add(new CheckFormSpam($container));
 
 $app->get('/spotify', SpotifyController::class . ':getSpotifyAuth')
 	->setName('spotify-get');

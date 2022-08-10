@@ -1,18 +1,18 @@
 <?php
+
 namespace App\Middleware\FormValidation;
 
-use Carbon\Carbon;
-use App\Models\SuperUserLogin;
 use \Delight\Cookie\Session as Session;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
-class CheckFormSpam {
+class CheckFormSpam
+{
 
 	protected $container;
 
 	const FORM_READY_AT_SESSION_NAME = 'post_request_ready_at';
-	const FORM_OBFUSCATION_SESSON_NAME = 'post_request_obfuscation_hash';
+	const FORM_OBFUSCATION_SESSION_NAME = 'post_request_obfuscation_hash';
 	const HUMAN_CHECK_TIME = 10;
 
 	public function __construct($container)

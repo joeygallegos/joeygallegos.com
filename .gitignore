@@ -39,3 +39,4 @@ bh_unicode_properties.cache
 .phpintel*
 *.log
 *.env
+app/views/cache/*
