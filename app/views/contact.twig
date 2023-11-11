@@ -13,12 +13,10 @@
 			</div>
 
 			<div class="col-xs-11 col-sm-11 col-md-6 col-lg-6 col-md-offset-1 col-lg-offset-1">
-				<form accept-charset="UTF-8" method="post" enctype="multipart/form-data" action="{{ path_for('contact-post', {'hash': backend.post_request_obfuscation_hash}) }}" autocomplete="off" novalidate>
+				<form accept-charset="UTF-8" method="post" enctype="multipart/form-data" action="{{ url_for('contact-post', {'hash': backend.post_request_obfuscation_hash}) }}" autocomplete="off" novalidate>
 					
-					{# {% if config. %}
-						<input type="text" name="{{ backend.post_request_obfuscation_hash }}" tabindex="-1" value="{{ backend.post_request_obfuscation_hash }}">
-						<input type="text" name="{{ backend.post_request_ready_at }}" tabindex="-1" value="{{ backend.post_request_ready_at }}">
-					{% endif %} #}
+					<input type="text" name="{{ backend.post_request_obfuscation_hash }}" tabindex="-1" value="{{ backend.post_request_obfuscation_hash }}">
+					<input type="text" name="{{ backend.post_request_ready_at }}" tabindex="-1" value="{{ backend.post_request_ready_at }}">
 
 					{# NAME AND ORGNAME #}
 					<div class="row form-group">
