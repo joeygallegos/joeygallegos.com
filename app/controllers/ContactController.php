@@ -1,17 +1,22 @@
 <?php
+
 namespace App\Controllers;
+
 use Carbon\Carbon;
 use App\Models\Config;
-use Slim\Http\Request;
-use Slim\Http\Response;
+use Slim\Psr7\Request;
+use Slim\Psr7\Response;
 use Delight\Cookie\Session;
 use App\Controllers\BaseController;
 use Respect\Validation\Validator as v;
+use DI\Container;
+
 class ContactController extends BaseController
 {
 
 	protected $container;
 	private $rules;
+	private $siteName;
 
 	const FORM_MESSAGE_REQUEST_SENT = 'Your contact request has been submitted successfully.';
 	const FORM_ERROR_VALIDATION = 'It looks like there was a problem with the information you provided on the form.';
@@ -22,13 +27,13 @@ class ContactController extends BaseController
 	const SESSION_TIME = 'submissionTimestamp';
 	const SPAM_CHECK_ATTRIBUTE = '_honey';
 	const FORM_READY_AT_SESSION_NAME = 'post_request_ready_at';
-	const FORM_OBFUSCATION_SESSON_NAME = 'post_request_obfuscation_hash';
+	const FORM_OBFUSCATION_SESSION_NAME = 'post_request_obfuscation_hash';
 	const HUMAN_CHECK_TIME = 10;
 
-	public function __construct($container)
+	public function __construct(Container $container)
 	{
 		$this->container = $container;
-		$this->logger = $this->container->contactFormLogger;
+		$this->logger = $this->container->get('contactFormLogger');
 		$this->siteName = 'Joey Gallegos';
 		$this->rules = [
 			'name' => [
@@ -82,18 +87,19 @@ class ContactController extends BaseController
 
 	public function getContactPage(Request $request, Response $response, array $args)
 	{
-		return $this->container->view->render($response, 'contact.twig', [
+		$this->logger->info(sprintf('getContactPage %s value = %s', self::FORM_OBFUSCATION_SESSION_NAME, Session::get(self::FORM_OBFUSCATION_SESSION_NAME)));
+		return $this->container->get('view')->render($response, 'contact.twig', [
 			'header_space_after' => true,
 			'page' => [
 				'title' => 'Contact | ' . $this->siteName
 			],
-			'data' => $this->container->flash->getFirstMessage('data'),
+			'data' => $this->container->get('flash')->getFirstMessage('data'),
 			'config' => Config::getArrayableData(),
 
 			// data for spam check
 			'backend' => [
 				self::FORM_READY_AT_SESSION_NAME => Session::get(self::FORM_READY_AT_SESSION_NAME),
-				self::FORM_OBFUSCATION_SESSON_NAME => Session::get(self::FORM_OBFUSCATION_SESSON_NAME),
+				self::FORM_OBFUSCATION_SESSION_NAME => Session::get(self::FORM_OBFUSCATION_SESSION_NAME),
 			]
 		]);
 	}
@@ -102,12 +108,11 @@ class ContactController extends BaseController
 	{
 		// obfuscation hash check
 		$pathHash = sanitize($args['hash']);
-		$sessionHash = Session::get(self::FORM_OBFUSCATION_SESSON_NAME);
-		
+		$sessionHash = Session::get(self::FORM_OBFUSCATION_SESSION_NAME);
+
 		// check if the hashes match
 		$this->log('info', __FUNCTION__, 'Checking if the obfuscation hashes matched');
-		if ($this->doesNotMatch($pathHash, $sessionHash))
-		{
+		if ($this->doesNotMatch($pathHash, $sessionHash)) {
 			$this->log('error', __FUNCTION__, 'pathHash:' . $pathHash);
 			$this->log('error', __FUNCTION__, 'sessionHash:' . $sessionHash);
 			$this->log('error', __FUNCTION__, 'Request and session obfuscation hashes did not match');
@@ -115,7 +120,7 @@ class ContactController extends BaseController
 				'flashes' => [
 					[
 						'type' => 'error',
-						'message' => 'Sorry, but an error with your session occoured. Please refresh your page and try again.'
+						'message' => 'Sorry, but an error with your session occurred. Please refresh your page and try again.'
 					]
 				]
 			];
@@ -158,20 +163,19 @@ class ContactController extends BaseController
 		$shouldBlockRequest = false;
 
 		// vanilla validation
-		$validation = $this->container->validator->validate($request, $this->rules);
-		if ($validation->failed())
-		{
+		$validation = $this->container->get('validator')->validate($request, $this->rules);
+		if ($validation->failed()) {
 			$this->log('error', __FUNCTION__, 'Form validation error, but checking for honeypot detection');
 
 			// validation engine check
 			if (!empty($validation->errors()[self::SPAM_CHECK_ATTRIBUTE])) {
-				$this->log('error', __FUNCTION__, 'Validation failed for '. self::SPAM_CHECK_ATTRIBUTE . '');
+				$this->log('error', __FUNCTION__, 'Validation failed for ' . self::SPAM_CHECK_ATTRIBUTE . '');
 				$shouldBlockRequest = true;
 			}
 
 			// check actual param
-			if (!isNullOrEmptyString($request->getParam(self::SPAM_CHECK_ATTRIBUTE))) {
-				$this->log('error', __FUNCTION__, 'isNullOrEmptyString = false for '. self::SPAM_CHECK_ATTRIBUTE . '');
+			if (!isNullOrEmptyString($request->getParsedBody()[self::SPAM_CHECK_ATTRIBUTE])) {
+				$this->log('error', __FUNCTION__, 'isNullOrEmptyString = false for ' . self::SPAM_CHECK_ATTRIBUTE . '');
 				$shouldBlockRequest = true;
 			}
 
@@ -197,7 +201,7 @@ class ContactController extends BaseController
 			return $this->responseWithFlash($request, $response, $data, 'contact-get', []);
 		}
 
-		$contactParams = $request->getParams();
+		$contactParams = $request->getParsedBody();
 		$formArr = [];
 		foreach ($contactParams as $paramKey => $paramValue) {
 			$formArr[$paramKey] = sanitize($paramValue);
@@ -211,12 +215,9 @@ class ContactController extends BaseController
 		$html = 'You have a new contact request from the contact page:<br><br>';
 		foreach ($this->rules as $field => $rules) {
 			$this->log('info', __FUNCTION__, 'Field: ' . ucfirst($field) . ' - Value: ' . $formArr[$field]);
-			if ($rules['type'] == 'input')
-			{
+			if ($rules['type'] == 'input') {
 				$html .= "<strong>" . ucfirst($field) . ":</strong><br><span color='#8592a5' style='color: #8592a5;'>" . $formArr[$field] . "</span><br><br>";
-			}
-			else if ($rules['type'] == 'textarea')
-			{
+			} else if ($rules['type'] == 'textarea') {
 				$html .= "<strong>" . ucfirst($field) . ":</strong><br><span color='#8592a5' style='color: #8592a5;'>" . nl2br($formArr[$field]) . "</span><br><br>";
 			}
 		}
@@ -230,10 +231,9 @@ class ContactController extends BaseController
 			'html' => $html,
 		];
 		$this->log('info', __FUNCTION__, json_encode($emailArr));
-		$notified = $this->container->emailEngine->createEmail($emailArr);
+		$notified = $this->container->get('emailEngine')->createEmail($emailArr);
 
-		if ($notified)
-		{
+		if ($notified) {
 			$this->log('info', __FUNCTION__, 'Email notification sent without error!');
 			$this->log('info', __FUNCTION__, 'Contact form data:');
 			foreach ($formArr as $paramKey => $paramValue) {
@@ -280,7 +280,8 @@ class ContactController extends BaseController
 	 * @param  string $sessionHash the hash provided in the session
 	 * @return bool | if the strings match or not
 	 */
-	protected function doesNotMatch(string $requestHash, string $sessionHash) {
-		return $requestHash!=$sessionHash;
+	protected function doesNotMatch(string $requestHash, string $sessionHash)
+	{
+		return $requestHash != $sessionHash;
 	}
 }

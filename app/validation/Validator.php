@@ -1,12 +1,13 @@
 <?php
+
 namespace App\Validation;
 
-use Slim\Container;
-use Slim\Http\Request;
+use Slim\Psr7\Request;
 use Delight\Cookie\Session;
 use Respect\Validation\Exceptions\NestedValidationException;
 
-class Validator {
+class Validator
+{
 
 	/**
 	 * Array of errors from validation
@@ -14,22 +15,16 @@ class Validator {
 	 */
 	protected $errors = [];
 
-	public function __construct(Container $container)
-	{
-		$this->container = $container;
-	}
-
 	/**
 	 * Validate request parameters against rule array
 	 * @return Validator instance
 	 */
 	public function validate(Request $request, array $rules)
 	{
-		foreach ($rules as $field => $config)
-		{
+		foreach ($rules as $field => $config) {
 			// check request param against rule for matching param name
 			try {
-				$config['validator']->setName($config['clean_name'])->assert($request->getParam($field));
+				$config['validator']->setName($config['clean_name'])->assert($request->getParsedBody()[$field]);
 			} catch (NestedValidationException $e) {
 				$this->errors[$field] = $e->getMessages();
 			}

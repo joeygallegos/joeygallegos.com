@@ -3,8 +3,10 @@
 namespace App\Middleware\FormValidation;
 
 use \Delight\Cookie\Session as Session;
-use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Message\ResponseInterface;
+
+use Psr\Http\Message\ServerRequestInterface as Request;
+use Psr\Http\Server\RequestHandlerInterface as RequestHandler;
+use Slim\Psr7\Response;
 
 class CheckFormSpam
 {
@@ -20,8 +22,9 @@ class CheckFormSpam
 		$this->container = $container;
 	}
 
-	public function __invoke(ServerRequestInterface $request, ResponseInterface $response, callable $next)
+	public function __invoke(Request $request, RequestHandler $handler): Response
 	{
+		$response = $handler->handle($request);
 		// if doesn't have token from the contact page get request
 		// but is trying to post to the contact form
 		// likely a bot trying to use form without going to webpage first
@@ -32,6 +35,6 @@ class CheckFormSpam
 		}
 
 		// Session::set(self::FORM_READY_AT_SESSION_NAME, Carbon::now());
-		return $next($request, $response);
+		return $response;
 	}
 }
