@@ -1,7 +1,11 @@
 <?php
+
 namespace App\Models;
+
 use Illuminate\Database\Eloquent\Model as Eloquent;
-class Config extends Eloquent {
+
+class Config extends Eloquent
+{
 	protected $table = 'config';
 	protected $fillable = [
 		'id',
@@ -21,9 +25,10 @@ class Config extends Eloquent {
 	public $timestamps = false;
 
 	// get a section from the config
-	public static function get($key = '', $default = '') {
+	public static function get($key = '', $default = '')
+	{
 		$entry = self::where('configuration_key', '=', $key)->first();
-		
+
 		// return default value
 		if (is_null($entry)) {
 			if (is_string($default)) {
@@ -44,7 +49,8 @@ class Config extends Eloquent {
 		return $entry->configuration_value;
 	}
 
-	public static function updateSection($key = null, $value = null, $logger = null) {
+	public static function updateSection($key = null, $value = null, $logger = null)
+	{
 		if (is_null($key)) throw new \Exception('The key provided is null', 1);
 		if (is_null($value)) throw new \Exception('The value to update is null', 1);
 
@@ -65,14 +71,15 @@ class Config extends Eloquent {
 		}
 
 		if ($activeLog) {
-			self::__logChange($logger, __FUNCTION__, $entry->configuration_key, $entry->configuration_value, $value);
+			self::__logChange(__FUNCTION__, $entry->configuration_key, $entry->configuration_value, $value, $logger);
 		}
 
 		$entry->configuration_value = $value;
 		return $entry->save();
 	}
 
-	public static function updateRaw($key = null, $newValue = null, $logger = null) {
+	public static function updateRaw($key = null, $newValue = null, $logger = null)
+	{
 		if (is_null($key)) throw new \Exception('The key provided is null', 1);
 
 		// valid logger instance
@@ -94,14 +101,15 @@ class Config extends Eloquent {
 		}
 
 		if ($activeLog) {
-			self::__logChange($logger, __FUNCTION__, $entry->configuration_key, $entry->configuration_value, $newValue);
+			self::__logChange(__FUNCTION__, $entry->configuration_key, $entry->configuration_value, $newValue, $logger);
 		}
 
 		$entry->configuration_value = $newValue;
 		return $entry->save();
 	}
 
-	private static function __logChange($logger = null, $functionName, $key, $before, $after) {
+	private static function __logChange($functionName, $key, $before, $after, $logger = null)
+	{
 		if (is_null($after)) $after = 'NULL';
 
 		if (!is_null($logger)) {
@@ -109,10 +117,11 @@ class Config extends Eloquent {
 		}
 	}
 
-	public static function getRaw($section = '', $defaultValue = '') {
+	public static function getRaw($section = '', $defaultValue = '')
+	{
 		$item = self::where('configuration_key', '=', $section)->first();
 		$returnedValue = $item->configuration_value;
-		
+
 		// return default value
 		if (is_null($returnedValue) || $returnedValue === '') return $defaultValue;
 		return $returnedValue;
