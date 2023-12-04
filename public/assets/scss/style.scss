@@ -720,6 +720,38 @@ textarea {
 	}
 }
 
+// ----------------------------------------------
+// BUTTON DESIGN V2 - 2023
+// ----------------------------------------------
+.button {
+	font-size: 18px;
+	color: white !important;
+	text-transform: uppercase;
+	text-decoration: none;
+
+	background: $color-primary-blue;
+	border-radius: 16px;
+
+	border: 2px solid $color-primary-blue;
+	border-bottom: 6px solid darken($color-primary-blue, 15%);
+
+	width: 100%;
+	display: block;
+	text-align: center;
+
+	padding: 1.2rem 1.8rem;
+	line-height: 100%;
+	min-height: 50px;
+	transition: all 0.1s;
+
+	margin: 0 0 1rem 0;
+
+	&:active {
+		border: 2px solid $color-primary-blue;
+		transition: all 0.1s;
+	}
+}
+
 .input-section {
 	width: 100%;
 	margin-bottom: 1.5rem;
