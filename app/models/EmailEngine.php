@@ -1,27 +1,34 @@
 <?php
+
 namespace App\Models;
+
 use App\Models\Config;
 use Mailgun\Mailgun;
-class EmailEngine {
 
-	public $publicMailgun;
-	public $privateMailgun;
-	public $domain;
-	public $emailEngineLogger;
+class EmailEngine
+{
 
-	public function __construct($publicKey, $privateKey, $domain, $fromEmail, $emailEngineLogger) {
-		$this->publicMailgun = new Mailgun($publicKey);
-		$this->privateMailgun = new Mailgun($privateKey);
+	private $publicMailgun;
+	private $privateMailgun;
+	private $domain;
+	private $fromEmail;
+	private $logger;
+
+	public function __construct(string $publicKey, string $privateKey, string $domain, string $fromEmail, $logger)
+	{
+		$this->publicMailgun = Mailgun::create($publicKey);
+		$this->privateMailgun = Mailgun::create($privateKey);
 		$this->domain = $domain;
 		$this->fromEmail = $fromEmail;
-		$this->emailEngineLogger = $emailEngineLogger;
+		$this->logger = $logger;
 	}
 
 	/**
 	 * Returns a private instance of the mailgun endpoint API
 	 * @return Mailgun Object
 	 */
-	public function getPrivateMailgunInstance() {
+	public function getPrivateMailgunInstance()
+	{
 		return $this->privateMailgun;
 	}
 
@@ -29,7 +36,8 @@ class EmailEngine {
 	 * Returns a public instance of the mailgun endpoint API
 	 * @return Mailgun Object
 	 */
-	public function getPublicMailgunInstance() {
+	public function getPublicMailgunInstance()
+	{
 		return $this->publicMailgun;
 	}
 
@@ -37,7 +45,8 @@ class EmailEngine {
 	 * Get domain name
 	 * @return String domain for mailgun
 	 */
-	public function getDomain() {
+	public function getDomain()
+	{
 		return $this->domain;
 	}
 
@@ -45,7 +54,8 @@ class EmailEngine {
 	 * Get from email
 	 * @return String from email for mailgun
 	 */
-	public function getFromEmail() {
+	public function getFromEmail()
+	{
 		return $this->fromEmail;
 	}
 
@@ -53,7 +63,8 @@ class EmailEngine {
 	 * Get unsubscribes
 	 * @return Array email unsubscribes
 	 */
-	public function getUnsubscribes() {
+	public function getUnsubscribes()
+	{
 		return $this->privateMailgun->get($this->domain . '/unsubscribes');
 	}
 
@@ -61,16 +72,19 @@ class EmailEngine {
 	 * Get bounces
 	 * @return Array email bounces
 	 */
-	public function getBounces() {
-		return $this->privateMailgun->get($this->domain . '/bounces');
+	public function getBounces()
+	{
+		// return $this->privateMailgun->get($this->domain . '/bounces');
+		return $this->privateMailgun->suppressions()->bounces()->index($this->domain);
 	}
 
 	/**
 	 * Get complaints
 	 * @return Array email complaints
 	 */
-	public function getComplaints() {
-		return $this->privateMailgun->get($this->domain . '/complaints');
+	public function getComplaints()
+	{
+		return $this->privateMailgun->suppressions()->complaints()->index($this->domain);
 	}
 
 	/**
@@ -78,7 +92,8 @@ class EmailEngine {
 	 * @link https://documentation.mailgun.com/en/latest/api-events.html#examples
 	 * @return Array events
 	 */
-	public function getEvents($query = []) {
+	public function getEvents($query = [])
+	{
 		if (empty($query)) return null;
 		return $this->privateMailgun->get($this->domain . '/events', $query);
 	}
@@ -89,44 +104,45 @@ class EmailEngine {
 	 * @param  string  $email Email address to be checked
 	 * @return boolean If email is valid
 	 */
-	public function isValidEmail($email = '', $container) {
-		$this->emailEngineLogger->info("EmailEngine>> Checking email address: {$email}");
+	public function isValidEmail(string $email = '')
+	{
+		$this->logger->info("EmailEngine > Checking email address: {$email}");
 
 		// basic sanity check
 		$emailPreCheck = !filter_var($email, FILTER_VALIDATE_EMAIL) === false;
 		if ($emailPreCheck) {
-			$this->emailEngineLogger->info('EmailEngine>> Email matches regex check.. Testing with Mailgun..');
+			$this->logger->info('EmailEngine > Email matches regex check.. Testing with Mailgun..');
 		}
 
 		// if no external checking
 		if (!Config::get('external_validation', false) && $emailPreCheck) {
-			$this->emailEngineLogger->info('EmailEngine>> External validation disabled, email passed');
+			$this->logger->info('EmailEngine > External validation disabled, email passed');
 			return $emailPreCheck;
 		}
 
 		// try the external validation
 		try {
 			$result = $this->publicMailgun->get('address/validate', ['address' => $email]);
-			$this->emailEngineLogger->info("EmailEngine>> API response: " . var_export($result, true));
+			$this->logger->info("EmailEngine > API response: " . var_export($result, true));
 
 			$valid = $result->http_response_body->is_valid > 0;
-			$this->emailEngineLogger->info("EmailEngine>> API.http_response_body.is_valid=" . ($valid ? "true" : "false") . "");
+			$this->logger->info("EmailEngine > API.http_response_body.is_valid=" . ($valid ? "true" : "false") . "");
 
 			if ($emailPreCheck && $valid) {
-				$this->emailEngineLogger->info('EmailEngine>> Email pre-check and API check both passed');
+				$this->logger->info('EmailEngine > Email pre-check and API check both passed');
 			}
 
 			if ($emailPreCheck) {
 				if (!$valid) {
-					$this->emailEngineLogger->info('EmailEngine>> Email pre-check passed but API check did not pass');
+					$this->logger->info('EmailEngine > Email pre-check passed but API check did not pass');
 				}
 			}
 
 			return $valid;
-		} catch(Exception $e) {
-			$this->emailEngineLogger->error("EmailEngine>> Failure while checking email: {$email}");
-			$this->emailEngineLogger->error("EmailEngine>> {$e->getMessage()}");
-			$this->emailEngineLogger->error('EmailEngine>> Using normal means to check email..');
+		} catch (\Exception $e) {
+			$this->logger->error("EmailEngine > Failure while checking email: {$email}");
+			$this->logger->error("EmailEngine > {$e->getMessage()}");
+			$this->logger->error('EmailEngine > Using normal means to check email..');
 
 			return $emailPreCheck;
 		}
@@ -138,22 +154,23 @@ class EmailEngine {
 	 * @param  string  $email Email address to be checked
 	 * @return boolean If email is valid
 	 */
-	public function isDisposableEmail($email = '', $container) {
+	public function isDisposableEmail($email = '')
+	{
 		if (!Config::get('external_validation', false)) {
 			return false;
 		}
-		
-		$this->emailEngineLogger->info("EmailEngine>> Checking if disposable email: {$email}");
+
+		$this->logger->info("EmailEngine > Checking if disposable email: {$email}");
 		try {
 			$result = $this->publicMailgun->get("address/validate", ['address' => $email]);
-			$this->emailEngineLogger->info("EmailEngine>> API response: " . var_export($result, true));
+			$this->logger->info("EmailEngine > API response: " . var_export($result, true));
 
 			$valid = $result->http_response_body->is_disposable_address > 0;
-			$this->emailEngineLogger->info("EmailEngine>> API.http_response_body.is_disposable_address=" . ($valid ? "true" : "false") . "");
+			$this->logger->info("EmailEngine > API.http_response_body.is_disposable_address=" . ($valid ? "true" : "false") . "");
 			return $valid;
-		} catch(Exception $e) {
-			$this->emailEngineLogger->error("EmailEngine>> Failure while checking email: {$email}");
-			$this->emailEngineLogger->error("EmailEngine>> {$e->getMessage()}");
+		} catch (\Exception $e) {
+			$this->logger->error("EmailEngine > Failure while checking email: {$email}");
+			$this->logger->error("EmailEngine > {$e->getMessage()}");
 			return false;
 		}
 	}
@@ -162,34 +179,53 @@ class EmailEngine {
 	 * Create and send an email to a user
 	 * @param  array $parameters settings for email
 	 */
-	public function createEmail($parameters) {
+	public function createEmail($parameters = [])
+	{
+
+		$messagePayload = [];
 		$to = $parameters['to'];
-		$bcc = $parameters['bcc'];
 		$from = $parameters['from'];
-		$replyTo = $parameters['reply-to'];
 		$subject = $parameters['subject'];
-		$text = $parameters['text'];
 		$html = $parameters['html'];
 
+		// if specific from not given, supply one
 		if (!isset($parameters['from'])) {
-			$parameters['from'] = getenv('ADMINTOOLS_FROM');
+			$parameters['from'] = $_ENV['ADMINTOOLS_FROM'];
+		}
+
+		// usually by default the email has all these
+		$messagePayload = [
+			'from' => $from,
+			'to' => $to,
+			'subject' => $subject,
+			'html' => $html
+		];
+
+		// TODO: Cleanup these checks
+		if (isset($parameters['bcc'])) {
+			$messagePayload['bcc'] = $parameters['bcc'];
+		}
+		if (isset($parameters['text'])) {
+			$messagePayload['text'] = $parameters['text'];
+		}
+
+		// must add "h:reply-to" to signify a header
+		if (isset($parameters['reply-to'])) {
+			$messagePayload['h:reply-to'] = $parameters['reply-to'];
+		}
+
+		// check for attachment
+		if (isset($parameters['attachment'])) {
+			$messagePayload['attachment'] = $parameters['attachment'];
 		}
 
 		$response = false;
 		try {
-			$response = $this->getPrivateMailgunInstance()->sendMessage($this->getDomain(), [
-				'from' => $from,
-				'to' => $to,
-				'bcc' => $bcc,
-				'h:reply-to' => $replyTo,
-				'subject' => $subject,
-				'text' => $text,
-				'html' => $html
-			]);
+			$response = $this->getPrivateMailgunInstance()->messages()->send($this->getDomain(), $messagePayload);
 		} catch (\RuntimeException $e) {
-			$this->emailEngineLogger->error('EmailEngine>> RuntimeException thrown');
-			$this->emailEngineLogger->error("EmailEngine>> {$e->getMessage()}");
-			$this->emailEngineLogger->error("EmailEngine>> " . json_encode($parameters));
+			$this->logger->error('EmailEngine > RuntimeException thrown');
+			$this->logger->error("EmailEngine > {$e->getMessage()}");
+			$this->logger->error("EmailEngine > " . json_encode($parameters));
 		}
 		return $response;
 	}
