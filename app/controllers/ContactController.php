@@ -77,6 +77,7 @@ class ContactController extends BaseController
 			// ex: https://gist.github.com/andrewlimaza/958826feac907114a57462bfc8d535ff
 			self::SPAM_CHECK_ATTRIBUTE => [
 				'clean_name' => self::SPAM_CHECK_ATTRIBUTE,
+				'type' => 'input',
 				'validator' => v::noneOf(
 					v::notEmpty(),
 					v::notBlank()
