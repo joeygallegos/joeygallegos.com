@@ -23,6 +23,8 @@ $app->get('/style', HomeController::class . ':getStylePage')->setName('style-get
 
 $app->get('/portfolio/{descriptor}', ProjectController::class . ':getProjectPage')->setName('project');
 
+$app->get('/links', HomeController::class . ':getLinksPage')->setName('links-get');
+
 // ----------------------------------------------
 // SOCIAL PAGE
 // ----------------------------------------------

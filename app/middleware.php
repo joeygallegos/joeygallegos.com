@@ -26,7 +26,7 @@ $app = AppFactory::create();
 // TWIG TEMPLATE ENGINE
 // ----------------------------------------------
 $container->set('view', function () use ($app) {
-	$twig = Twig::create('../app/views/', ['cache' => '../app/views/cache']);
+	$twig = Twig::create('../app/views/', ['cache' => false]);
 	$runtimeLoader = new TwigRuntimeLoader(
 		$app->getRouteCollector()->getRouteParser(),
 		(new UriFactory)->createFromGlobals($_SERVER),
@@ -50,6 +50,11 @@ $app->add(new PreserveInputMiddleware($container));
 $app->add(TwigMiddleware::createFromContainer($app));
 
 // random generator
+$container->set('app', function () use ($app) {
+	return $app;
+});
+
+// random generator
 $container->set('randomGenerator', function () {
 	$factory = new RandomLib\Factory;
 	return $factory->getGenerator(new SecurityLib\Strength(SecurityLib\Strength::MEDIUM));
@@ -59,7 +64,13 @@ $container->set('randomGenerator', function () {
 // EMAIL ENGINE
 // ----------------------------------------------
 $container->set('emailEngine', function ($container) {
-	return new EmailEngine(getenv('MAILGUN_PUBKEY'), getenv('MAILGUN_KEY'), getenv('MAILGUN_DOMAIN'), getenv('MAILGUN_FROM'), $container->emailEngineLogger);
+	return new EmailEngine(
+		getenv('MAILGUN_PUBKEY'),
+		getenv('MAILGUN_KEY'),
+		getenv('MAILGUN_DOMAIN'),
+		getenv('MAILGUN_FROM'),
+		$container->get('emailEngineLogger')
+	);
 });
 
 // ----------------------------------------------
@@ -80,14 +91,37 @@ $container->set('flash', function ($container) {
 // SPOTIFY
 // ----------------------------------------------
 $container->set('spotify', function ($container) {
+
+	// setup the session, used for interacting with our session tokens
 	$session = new SpotifyWebAPI\Session(
 		getenv('SPOTIFY_CLIENT_ID'),
 		getenv('SPOTIFY_CLIENT_SECRET'),
 		getenv('SPOTIFY_REDIRECT_URI')
 	);
+	$session->setRefreshToken(Config::get('spotify_refresh_token'));
+	$sessionAccessToken = $session->getAccessToken();
+	$sessionAccessTokenFromDatabase = Config::get('spotify_access_token');
+	$expiration = $session->getTokenExpiration();
 
+
+
+	$container->get('spotifyLogger')->info('====================================');
+	$container->get('spotifyLogger')->info('SPOTIFY ACCESSED');
+	$container->get('spotifyLogger')->info('Access Token from Session: ' . $sessionAccessToken);
+	$container->get('spotifyLogger')->info('Access Token from Database: ' . $sessionAccessTokenFromDatabase);
+	$container->get('spotifyLogger')->info('Refresh Token from Session: ' . $session->getRefreshToken());
+	$container->get('spotifyLogger')->info('Token Expiration from Session: ' . $expiration);
+
+	// deploy new access token if DB and new one do not match
+	$session->refreshAccessToken();
+	if ($session->getAccessToken() != $sessionAccessTokenFromDatabase) {
+		$container->get('spotifyLogger')->info('TASK: Session access token doesn\'t match storage access token - updating DB');
+		Config::updateSection('spotify_access_token', $session->getAccessToken(), $container->get('spotifyLogger'));
+	}
+
+	// setup API with session access token stored in DB
 	$api = new SpotifyWebAPI\SpotifyWebAPI();
-	$api->setAccessToken(Config::get('spotify_access_token'));
+	$api->setAccessToken($sessionAccessTokenFromDatabase);
 
 	return [
 		'session' => $session,

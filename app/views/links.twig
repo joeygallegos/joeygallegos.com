@@ -1,0 +1,49 @@
+{% extends 'layout.twig' %}
+
+{% block body %}
+<style>
+ul.links-list {
+    margin: 2rem 0;
+}
+</style>
+<section id="home-about-me" class="">
+	<div class="row center-xs center-sm left-text">
+		<div class="redesign-message-container">
+			<div class="redesign-message-content">
+				<div class="author_part wow slideInLeft" role="button">
+					<div class="avatar_wrap">
+						<span role="link" tabindex="0">
+							<a href="{{ url_for('contact-get') }}">
+								<img class="avatar" src="{{ env.profile_pic }}" alt="Joey's picture">
+							</a>
+						</span>
+					</div>
+				</div>
+				<h1 class="redesign-message-title tight">
+					Joey Gallegos &mdash; Links
+				</h1>
+                <br>
+                <h3 class="redesign-message-title tight">
+					Now listening to:<br><br>{{ currentSongSpotify.song }} by {{ currentSongSpotify.artist }}
+				</h3>
+				    {% if pageLinks is not empty %}
+                        <ul class="links-list">
+                            {% for link in pageLinks %}
+                                <li>
+                                    <a href="{{ link.url }}?ref=Links" target="_blank" rel="noopener noreferrer" class="button">
+                                        <strong>{{ link.title }}</strong>
+                                    </a>
+                                    {% if link.description %}
+                                        <p>{{ link.description }}</p>
+                                    {% endif %}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p>404 - no links found.</p>
+                    {% endif %}
+			</div>
+		</div>
+	</div>
+</section>
+{% endblock %}
