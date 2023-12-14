@@ -1,6 +1,7 @@
 <?php
 
 use DI\Container;
+use Carbon\Carbon;
 use Slim\Views\Twig;
 use App\Models\Config;
 use Slim\Flash\Messages;
@@ -9,11 +10,11 @@ use App\Models\EmailEngine;
 use Slim\Factory\AppFactory;
 use App\Validation\Validator;
 use Slim\Views\TwigMiddleware;
+use Slim\Psr7\Factory\UriFactory;
+use Slim\Views\TwigRuntimeLoader;
 use Slim\Middleware\ErrorMiddleware;
 use App\Middleware\FormValidation\PreserveInputMiddleware;
 use App\Middleware\FormValidation\ValidationErrorsMiddleware;
-use Slim\Psr7\Factory\UriFactory;
-use Slim\Views\TwigRuntimeLoader;
 
 // create container using DI\Container
 $container = new Container();
@@ -92,36 +93,70 @@ $container->set('flash', function ($container) {
 // ----------------------------------------------
 $container->set('spotify', function ($container) {
 
+	$logger = $container->get('spotifyLogger');
+
 	// setup the session, used for interacting with our session tokens
 	$session = new SpotifyWebAPI\Session(
 		getenv('SPOTIFY_CLIENT_ID'),
 		getenv('SPOTIFY_CLIENT_SECRET'),
 		getenv('SPOTIFY_REDIRECT_URI')
 	);
-	$session->setRefreshToken(Config::get('spotify_refresh_token'));
+
+	// Refresh token
+	$refreshTokenFromDatabase = Config::get('spotify_refresh_token');
+	$session->setRefreshToken($refreshTokenFromDatabase);
+
+	// Access token
 	$sessionAccessToken = $session->getAccessToken();
 	$sessionAccessTokenFromDatabase = Config::get('spotify_access_token');
-	$expiration = $session->getTokenExpiration();
+	$expirationForAccessToken = $session->getTokenExpiration();
 
+	$logger->debug('====================================');
+	$logger->debug('SPOTIFY ACCESSED');
+	$logger->debug('Access Token from Session: ' . $sessionAccessToken);
+	$logger->debug('Access Token from Database: ' . $sessionAccessTokenFromDatabase);
+	$logger->debug('Refresh Token from Session: ' . $session->getRefreshToken());
+	$logger->debug('Access Token Expiration from Session: ' . $expirationForAccessToken);
 
-
-	$container->get('spotifyLogger')->info('====================================');
-	$container->get('spotifyLogger')->info('SPOTIFY ACCESSED');
-	$container->get('spotifyLogger')->info('Access Token from Session: ' . $sessionAccessToken);
-	$container->get('spotifyLogger')->info('Access Token from Database: ' . $sessionAccessTokenFromDatabase);
-	$container->get('spotifyLogger')->info('Refresh Token from Session: ' . $session->getRefreshToken());
-	$container->get('spotifyLogger')->info('Token Expiration from Session: ' . $expiration);
-
-	// deploy new access token if DB and new one do not match
-	$session->refreshAccessToken();
-	if ($session->getAccessToken() != $sessionAccessTokenFromDatabase) {
-		$container->get('spotifyLogger')->info('TASK: Session access token doesn\'t match storage access token - updating DB');
-		Config::updateSection('spotify_access_token', $session->getAccessToken(), $container->get('spotifyLogger'));
+	// Use previously requested tokens fetched from database
+	if (!isNullOrEmptyString($sessionAccessTokenFromDatabase)) {
+		$logger->debug('Setting session object access and refresh token from database values');
+		$session->setAccessToken($sessionAccessTokenFromDatabase);
+		$session->setRefreshToken($refreshTokenFromDatabase);
+	} else {
+		// Or request a new access token
+		$logger->debug('Getting new access token using database refresh token');
+		$session->refreshAccessToken($refreshTokenFromDatabase);
 	}
 
-	// setup API with session access token stored in DB
-	$api = new SpotifyWebAPI\SpotifyWebAPI();
-	$api->setAccessToken($sessionAccessTokenFromDatabase);
+	$options = [
+		'auto_refresh' => true,
+	];
+
+	// setup API with options and session data we have
+	$api = new SpotifyWebAPI\SpotifyWebAPI($options, $session);
+
+	// Remember to grab the tokens afterwards, they might have been updated
+	$newAccessToken = $session->getAccessToken();
+	$newRefreshToken = $session->getRefreshToken();
+
+	// Update the API object with the new access token
+	$api->setAccessToken($newAccessToken);
+
+	// Update DB if the values are not the same
+	if (Config::get('spotify_access_token') != $newAccessToken) {
+		Config::updateSection('spotify_access_token', $newAccessToken, $logger);
+		Config::updateSection('debug_spotify_changed_at', (string)Carbon::now(), $logger);
+	}
+
+	if (Config::get('spotify_refresh_token') != $newRefreshToken) {
+		Config::updateSection('spotify_refresh_token', $newRefreshToken, $logger);
+		Config::updateSection('debug_spotify_changed_at', (string)Carbon::now(), $logger);
+	}
+
+	// Setup API with session access token stored in DB
+	$logger->debug('Setup API with session access token stored in DB');
+	$logger->debug($sessionAccessTokenFromDatabase);
 
 	return [
 		'session' => $session,

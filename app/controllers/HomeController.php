@@ -52,9 +52,25 @@ class HomeController extends BaseController
 			$currentTrack = $spotify['api']->getMyCurrentTrack(['auto_refresh' => true, 'auto_retry' => true]);
 		} catch (SpotifyWebAPIException $e) {
 			$this->logger->info($e);
+			die('exception');
 		}
 
+		$spotifyData = null;
+		if (is_null($spotify) || is_null($currentTrack)) {
+			$this->logger->info('Spotify instance or current track data are null');
+			$this->logger->info('Spotify dump:');
+			$this->logger->debug(json_encode($spotify));
+		} else {
+			$spotifyData = [
+				'song' => $currentTrack->item->name,
+				'artist' => $currentTrack->item->artists[0]->name,
+				'link' => $currentTrack->item->external_urls->spotify
+			];
+		}
+
+		// get link objects
 		$pageLinks = PageLink::orderBy('order')->get();
+
 		return $this->container->get('view')->render($response, 'links.twig', [
 			'header_space_after' => true,
 			'page' => [
@@ -64,11 +80,7 @@ class HomeController extends BaseController
 			'env' => [
 				'profile_pic' => getenv('PROFILE_PIC')
 			],
-			'currentSongSpotify' => [
-				'song' => $currentTrack->item->name,
-				'artist' => $currentTrack->item->artists[0]->name,
-				'link' => $currentTrack->item->external_urls->spotify
-			]
+			'currentSongSpotify' => $spotifyData,
 		]);
 	}
 
