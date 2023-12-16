@@ -40,3 +40,4 @@ bh_unicode_properties.cache
 *.log
 *.env
 app/views/cache/*
+*.code-workspace
