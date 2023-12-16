@@ -20,7 +20,7 @@
 		"php-http/curl-client": "^2.3",
 		"paragonie/random_compat": "^2|~9.99",
 		"guzzlehttp/psr7": "^1.5",
-		"jwilsson/spotify-web-api-php": "^6.0",
+		"jwilsson/spotify-web-api-php": "^6.0.2",
 		"ircmaxell/random-lib": "^1.2",
 		"calebporzio/sushi": "^2.1",
 		"slim/psr7": "^1.5",

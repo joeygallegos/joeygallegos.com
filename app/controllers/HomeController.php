@@ -47,12 +47,14 @@ class HomeController extends BaseController
 	{
 		// this returns a class - not array, so use accessors
 		// artists may contain more than one, so start at 0
+		// die('reached');
 		try {
 			$spotify = $this->container->get('spotify');
-			$currentTrack = $spotify['api']->getMyCurrentTrack(['auto_refresh' => true, 'auto_retry' => true]);
-		} catch (SpotifyWebAPIException $e) {
-			$this->logger->info($e);
-			die('exception');
+			$currentTrack = $spotify['api']->getMyCurrentTrack();
+			// TODO: Exception when no music is playing. Null value comes forward, but function throws exception because not expected
+		} catch (\Exception $e) {
+			$this->logger->error('Exception encountered while accessing current track');
+			$this->logger->error($e);
 		}
 
 		$spotifyData = null;

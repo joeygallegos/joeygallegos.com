@@ -130,7 +130,7 @@ $container->set('spotify', function ($container) {
 	}
 
 	$options = [
-		'auto_refresh' => true,
+		'auto_refresh' => true
 	];
 
 	// setup API with options and session data we have
