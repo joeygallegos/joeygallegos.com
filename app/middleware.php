@@ -2,6 +2,7 @@
 
 use DI\Container;
 use Carbon\Carbon;
+use Slim\Csrf\Guard;
 use Slim\Views\Twig;
 use App\Models\Config;
 use Slim\Flash\Messages;
@@ -13,6 +14,8 @@ use Slim\Views\TwigMiddleware;
 use Slim\Psr7\Factory\UriFactory;
 use Slim\Views\TwigRuntimeLoader;
 use Slim\Middleware\ErrorMiddleware;
+use App\Middleware\CsrfFailureHandler;
+use App\Middleware\ErrorHandler as ApplicationErrorHandler;
 use App\Middleware\FormValidation\PreserveInputMiddleware;
 use App\Middleware\FormValidation\ValidationErrorsMiddleware;
 
@@ -22,6 +25,20 @@ AppFactory::setContainer($container);
 
 // app instantiation must be done after container creation when using a factory
 $app = AppFactory::create();
+
+// Keep CSRF tokens in the active PHP session. Non-persistent mode makes each
+// successful unsafe request consume its token, which prevents replay.
+$csrfStorage = null;
+$csrfGuard = new Guard(
+	$app->getResponseFactory(),
+	'csrf',
+	$csrfStorage,
+	new CsrfFailureHandler($app->getResponseFactory()),
+	200,
+	16,
+	false
+);
+$container->set('csrf', $csrfGuard);
 
 // ----------------------------------------------
 // TWIG TEMPLATE ENGINE
@@ -50,6 +67,10 @@ $app->add(new PreserveInputMiddleware($container));
 // Add Twig-View Middleware
 $app->add(TwigMiddleware::createFromContainer($app));
 
+// Register after Twig so Slim's LIFO middleware stack validates unsafe
+// requests before form middleware or controllers can process their payloads.
+$app->add($csrfGuard);
+
 // random generator
 $container->set('app', function () use ($app) {
 	return $app;
@@ -57,8 +78,22 @@ $container->set('app', function () use ($app) {
 
 // random generator
 $container->set('randomGenerator', function () {
-	$factory = new RandomLib\Factory;
-	return $factory->getGenerator(new SecurityLib\Strength(SecurityLib\Strength::MEDIUM));
+	return new class {
+		public function generateString(int $length, string $alphabet): string
+		{
+			$alphabetLength = strlen($alphabet);
+			if ($length < 1 || $alphabetLength < 1) {
+				return '';
+			}
+
+			$value = '';
+			for ($i = 0; $i < $length; $i++) {
+				$value .= $alphabet[random_int(0, $alphabetLength - 1)];
+			}
+
+			return $value;
+		}
+	};
 });
 
 // ----------------------------------------------
@@ -109,14 +144,10 @@ $container->set('spotify', function ($container) {
 	// Access token
 	$sessionAccessToken = $session->getAccessToken();
 	$sessionAccessTokenFromDatabase = Config::get('spotify_access_token');
-	$expirationForAccessToken = $session->getTokenExpiration();
 
 	$logger->debug('====================================');
 	$logger->debug('SPOTIFY ACCESSED');
-	$logger->debug('Access Token from Session: ' . $sessionAccessToken);
-	$logger->debug('Access Token from Database: ' . $sessionAccessTokenFromDatabase);
-	$logger->debug('Refresh Token from Session: ' . $session->getRefreshToken());
-	$logger->debug('Access Token Expiration from Session: ' . $expirationForAccessToken);
+	$logger->debug('Spotify session credentials loaded');
 
 	// Use previously requested tokens fetched from database
 	if (!isNullOrEmptyString($sessionAccessTokenFromDatabase)) {
@@ -156,7 +187,6 @@ $container->set('spotify', function ($container) {
 
 	// Setup API with session access token stored in DB
 	$logger->debug('Setup API with session access token stored in DB');
-	$logger->debug($sessionAccessTokenFromDatabase);
 
 	return [
 		'session' => $session,
@@ -172,13 +202,12 @@ require_once dirname(__FILE__) . '/loggers.php';
 // ----------------------------------------------
 // ENVIRONMENT SETUP
 // ----------------------------------------------
-if (in_array(getenv('ENVIRONMENT'), ['assembly', 'staging'])) {
+$isDebugEnvironment = in_array(getenv('ENVIRONMENT'), ['assembly', 'staging'], true);
+if ($isDebugEnvironment) {
 	error_reporting(E_ALL);
 	ini_set('display_errors', 'On');
 	ini_set('display_startup_errors', 'On');
 	ini_set('max_execution_time', 0);
-
-	$app->add(new ErrorMiddleware($app->getCallableResolver(), $app->getResponseFactory(), true, true, true));
 
 	$cacheEngine = new CacheEngine(
 		$container->get('cacheLogger')
@@ -202,3 +231,16 @@ if (in_array(getenv('ENVIRONMENT'), ['assembly', 'staging'])) {
 	ini_set('display_errors', 'Off');
 	ini_set('display_startup_errors', 'Off');
 }
+
+$errorMiddleware = new ErrorMiddleware(
+	$app->getCallableResolver(),
+	$app->getResponseFactory(),
+	$isDebugEnvironment,
+	$isDebugEnvironment,
+	$isDebugEnvironment
+);
+$errorMiddleware->setDefaultErrorHandler(new ApplicationErrorHandler(
+	$container->get('view'),
+	$app->getResponseFactory()
+));
+$app->add($errorMiddleware);

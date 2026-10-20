@@ -1,10 +1,14 @@
 <?php
+
 namespace App\Models;
+
 use App\Models\Stat;
 use App\Models\ScopeItem;
 use App\Models\Testimony;
 use Illuminate\Database\Eloquent\Model as Eloquent;
-class Project extends Eloquent {
+
+class Project extends Eloquent
+{
 	protected $table = 'projects';
 	protected $fillable = [
 		'id',
@@ -20,7 +24,7 @@ class Project extends Eloquent {
 		'image'
 	];
 	protected $guarded = ['id'];
-	public $timestamps = false;	
+	public $timestamps = false;
 
 	/**
 	 * Get project stats
@@ -49,7 +53,8 @@ class Project extends Eloquent {
 		return $this->hasOne(Testimony::class);
 	}
 
-	public function toProjectArray() {
+	public function toProjectArray()
+	{
 		return [
 			'id' => $this->id,
 			'slug' => $this->slug,
@@ -64,5 +69,4 @@ class Project extends Eloquent {
 			'stats' => $this->stats
 		];
 	}
-
 }

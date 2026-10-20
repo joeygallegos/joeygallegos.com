@@ -2,6 +2,7 @@
 namespace App\Models;
 
 use ScssPhp\ScssPhp\Compiler;
+use ScssPhp\ScssPhp\OutputStyle;
 use MatthiasMullie\Minify\JS;
 
 class CacheEngine {
@@ -130,7 +131,7 @@ class CacheEngine {
 	private function compileSassFiles()
 	{
 		$compiler = new Compiler;
-		$compiler->setFormatter('ScssPhp\ScssPhp\Formatter\\' . $this->format);
+		$compiler->setOutputStyle($this->getOutputStyle());
 
 		$cacheLogger = $this->logger;
 		$cacheLogger->info('Compiling with ' . $this->format . ' format');
@@ -157,12 +158,17 @@ class CacheEngine {
 			$in = file_get_contents($this->sassInDirectory . '/' . $file->getFilename());
 
 			// compile and compress data
-			$out = $compiler->compile($in);
+			$out = $compiler->compileString($in)->getCss();
 
 			// put into the file
 			file_put_contents($this->sassOutDirectory . '/' . $file->getBasename('.scss') . '.css', $out);
 			$cacheLogger->info("Success, built ({$file->getFilename()})");
 		}
+	}
+
+	private function getOutputStyle(): OutputStyle
+	{
+		return $this->format === 'Expanded' ? OutputStyle::EXPANDED : OutputStyle::COMPRESSED;
 	}
 
 	public function build(string $format = 'Crunched')

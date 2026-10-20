@@ -5,23 +5,22 @@ use Illuminate\Database\Capsule\Manager as Capsule;
 
 require_once dirname(dirname(__FILE__)) . '/vendor/autoload.php';
 date_default_timezone_set('America/Chicago');
-session_start();
+if (session_status() !== PHP_SESSION_ACTIVE) {
+	session_start();
+}
 
 $config = dirname(__FILE__) . '/env/config.env';
-$copy = dirname(__FILE__) . '/env/config.env.example';
-if (!file_exists(dirname(__FILE__) . '/env/config.env')) {
-	if (!copy($copy, $config)) {
-		die("Failed to copy $copy...\n");
-	}
+if (!file_exists($config)) {
+	throw new \RuntimeException(sprintf('Missing required environment file: %s', $config));
 }
 
 try {
-	$config = Dotenv::create(__DIR__ . '/env/', 'config.env');
+	$config = Dotenv::createUnsafeImmutable(__DIR__ . '/env/', 'config.env');
 	$config->load();
 	$config->required(['DB_NAME', 'DB_USERNAME', 'DB_PASSWORD', 'HOST', 'PORT', 'DRIVER']);
 }
 catch (InvalidPathException $e) {
-	die($e->getMessage());
+	throw new \RuntimeException('Unable to load application environment configuration', 0, $e);
 }
 
 /**

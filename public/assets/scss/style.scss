@@ -752,6 +752,16 @@ textarea {
 	}
 }
 
+// Preserve a clear keyboard focus indicator even where component styles replace browser defaults.
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+	outline: 3px solid $color-primary-blue;
+	outline-offset: 2px;
+}
+
 .input-section {
 	width: 100%;
 	margin-bottom: 1.5rem;
@@ -761,14 +771,14 @@ textarea {
 	}
 
 	div.error {
-		color: red;
+		color: #b00020;
 		font-style: italic;
 	}
 
 	&.error input,
 	&.error textarea,
 	&.error select {
-		border: 1px solid red;
+		border: 1px solid #b00020;
 	}
 }
 

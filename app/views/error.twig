@@ -4,7 +4,7 @@
 			{% for flash in data.flashes %}
 				<div class="row center-xs center-sm center-md center-lg">
 					<div class="col-xs-11 col-sm-11 col-md-8 col-lg-8">
-						<div class="alert {{ flash.type == 'error' ? 'alert-danger' : '' }} {{ flash.type == 'success' ? 'alert-success' : '' }}"><strong>{{ flash.type == 'error' ? 'Error' : '' }}{{ flash.type == 'success' ? 'Success' : '' }}:</strong> {{ flash.message }}</div>
+						<div class="alert {{ flash.type == 'error' ? 'alert-danger' : '' }} {{ flash.type == 'success' ? 'alert-success' : '' }}" role="{{ flash.type == 'error' ? 'alert' : 'status' }}"><strong>{{ flash.type == 'error' ? 'Error' : '' }}{{ flash.type == 'success' ? 'Success' : '' }}:</strong> {{ flash.message }}</div>
 					</div>
 				</div>
 			{% endfor %}

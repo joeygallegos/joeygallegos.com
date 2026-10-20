@@ -3,9 +3,10 @@
 namespace App\Controllers;
 
 use Ramsey\Uuid\Uuid;
-use Slim\Http\Request;
 use App\Models\Project;
-use Slim\Http\Response;
+use DI\Container;
+use Slim\Psr7\Request;
+use Slim\Psr7\Response;
 use App\Controllers\BaseController;
 use SpotifyWebAPI\SpotifyWebAPIException;
 
@@ -14,10 +15,10 @@ class InterfaceController extends BaseController
 	protected $container;
 	protected $logger;
 
-	public function __construct($container)
+	public function __construct(Container $container)
 	{
 		$this->container = $container;
-		$this->logger = $this->container->debugLogger;
+		$this->logger = $this->container->get('debugLogger');
 	}
 
 	public function getDebugPage(Request $request, Response $response, array $args)
@@ -57,7 +58,7 @@ class InterfaceController extends BaseController
 				]
 			];
 		}
-		return $response->withHeader('Content-Type', 'application/json')->withJson($debugData, 200, JSON_PRETTY_PRINT);
+		return $this->responseWithJson($request, $response, $debugData, 200);
 	}
 
 	public function getAPI(Request $request, Response $response, array $args)
@@ -73,7 +74,7 @@ class InterfaceController extends BaseController
 			// push project array to API data array
 			array_push($data, $projectArr);
 		}
-		return $response->withHeader('Content-Type', 'application/json')->withJson($data, 200, JSON_PRETTY_PRINT);
+		return $this->responseWithJson($request, $response, $data, 200);
 	}
 
 	public function getTestPage(Request $request, Response $response, array $args)
@@ -90,6 +91,6 @@ class InterfaceController extends BaseController
 		];
 
 		$this->log('info', __FUNCTION__, 'Test page request pinged');
-		return $response->withHeader('Content-Type', 'application/json')->withJson($data, 200, JSON_PRETTY_PRINT);
+		return $this->responseWithJson($request, $response, $data, 200);
 	}
 }

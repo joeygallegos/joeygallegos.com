@@ -89,7 +89,7 @@ abstract class BaseController
 	 * @param  Request $request current request
 	 * @return String|Null base directory
 	 */
-	public function getBaseDirectory(Request $request = null)
+	public function getBaseDirectory(?Request $request = null): ?string
 	{
 		return !is_null($request) ? (string)$request->getUri()->withPath('')->withQuery('')->withFragment('') : null;
 	}

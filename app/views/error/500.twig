@@ -1,1 +1,17 @@
-Yikes! You shouldn't be seeing this error. Instead, go back <a href="/">home</a>!
+{% extends 'layout.twig' %}
+
+{% block body %}
+	<main>
+		<section>
+			<div class="container">
+				<div class="row center-xs">
+					<div class="col-xs-11 col-sm-8 col-md-6">
+						<h1>Something went wrong</h1>
+						<p>We couldn't complete your request. Please try again in a few moments.</p>
+						<p><a class="btn blue shadow" href="/">Go to homepage</a></p>
+					</div>
+				</div>
+			</div>
+		</section>
+	</main>
+{% endblock %}

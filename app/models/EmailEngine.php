@@ -65,7 +65,7 @@ class EmailEngine
 	 */
 	public function getUnsubscribes()
 	{
-		return $this->privateMailgun->get($this->domain . '/unsubscribes');
+		return $this->privateMailgun->suppressions()->unsubscribes()->index($this->domain);
 	}
 
 	/**
@@ -95,7 +95,7 @@ class EmailEngine
 	public function getEvents($query = [])
 	{
 		if (empty($query)) return null;
-		return $this->privateMailgun->get($this->domain . '/events', $query);
+		return $this->privateMailgun->events()->get($this->domain, $query);
 	}
 
 	/**
@@ -106,7 +106,7 @@ class EmailEngine
 	 */
 	public function isValidEmail(string $email = '')
 	{
-		$this->logger->info("EmailEngine > Checking email address: {$email}");
+		$this->logger->info('EmailEngine > Checking email address');
 
 		// basic sanity check
 		$emailPreCheck = !filter_var($email, FILTER_VALIDATE_EMAIL) === false;
@@ -122,11 +122,10 @@ class EmailEngine
 
 		// try the external validation
 		try {
-			$result = $this->publicMailgun->get('address/validate', ['address' => $email]);
-			$this->logger->info("EmailEngine > API response: " . var_export($result, true));
+			$result = $this->publicMailgun->emailValidationV4()->validate($email);
 
-			$valid = $result->http_response_body->is_valid > 0;
-			$this->logger->info("EmailEngine > API.http_response_body.is_valid=" . ($valid ? "true" : "false") . "");
+			$valid = $result->getResult() === 'deliverable';
+			$this->logger->info('EmailEngine > Email validation API check ' . ($valid ? 'passed' : 'failed'));
 
 			if ($emailPreCheck && $valid) {
 				$this->logger->info('EmailEngine > Email pre-check and API check both passed');
@@ -139,9 +138,9 @@ class EmailEngine
 			}
 
 			return $valid;
-		} catch (\Exception $e) {
-			$this->logger->error("EmailEngine > Failure while checking email: {$email}");
-			$this->logger->error("EmailEngine > {$e->getMessage()}");
+		} catch (\Exception) {
+			// Provider errors may echo the submitted address or credentials, so retain only the fallback outcome.
+			$this->logger->error('EmailEngine > Email validation API request failed');
 			$this->logger->error('EmailEngine > Using normal means to check email..');
 
 			return $emailPreCheck;
@@ -160,17 +159,16 @@ class EmailEngine
 			return false;
 		}
 
-		$this->logger->info("EmailEngine > Checking if disposable email: {$email}");
+		$this->logger->info('EmailEngine > Checking if email address is disposable');
 		try {
-			$result = $this->publicMailgun->get("address/validate", ['address' => $email]);
-			$this->logger->info("EmailEngine > API response: " . var_export($result, true));
+			$result = $this->publicMailgun->emailValidationV4()->validate($email);
 
-			$valid = $result->http_response_body->is_disposable_address > 0;
-			$this->logger->info("EmailEngine > API.http_response_body.is_disposable_address=" . ($valid ? "true" : "false") . "");
+			$valid = $result->isDisposableAddress();
+			$this->logger->info('EmailEngine > Disposable-email API check ' . ($valid ? 'matched' : 'did not match'));
 			return $valid;
-		} catch (\Exception $e) {
-			$this->logger->error("EmailEngine > Failure while checking email: {$email}");
-			$this->logger->error("EmailEngine > {$e->getMessage()}");
+		} catch (\Exception) {
+			// Keep enough information to alert operators without persisting the address or provider response.
+			$this->logger->error('EmailEngine > Disposable-email API request failed');
 			return false;
 		}
 	}
@@ -181,24 +179,25 @@ class EmailEngine
 	 */
 	public function createEmail($parameters = [])
 	{
+		// Validate before indexing the payload so malformed internal calls fail clearly instead of emitting PHP notices.
+		foreach (['to', 'subject', 'html'] as $requiredParameter) {
+			if (!isset($parameters[$requiredParameter])) {
+				throw new \InvalidArgumentException("Missing required email parameter: {$requiredParameter}");
+			}
+		}
 
-		$messagePayload = [];
-		$to = $parameters['to'];
-		$from = $parameters['from'];
-		$subject = $parameters['subject'];
-		$html = $parameters['html'];
-
-		// if specific from not given, supply one
-		if (!isset($parameters['from'])) {
-			$parameters['from'] = $_ENV['ADMINTOOLS_FROM'];
+		// Callers may override the configured sender for legitimate reply workflows, but most mail uses the service default.
+		$from = $parameters['from'] ?? $this->getFromEmail();
+		if ($from === '') {
+			throw new \InvalidArgumentException('Missing required email parameter: from');
 		}
 
 		// usually by default the email has all these
 		$messagePayload = [
 			'from' => $from,
-			'to' => $to,
-			'subject' => $subject,
-			'html' => $html
+			'to' => $parameters['to'],
+			'subject' => $parameters['subject'],
+			'html' => $parameters['html']
 		];
 
 		// TODO: Cleanup these checks
@@ -222,10 +221,9 @@ class EmailEngine
 		$response = false;
 		try {
 			$response = $this->getPrivateMailgunInstance()->messages()->send($this->getDomain(), $messagePayload);
-		} catch (\RuntimeException $e) {
-			$this->logger->error('EmailEngine > RuntimeException thrown');
-			$this->logger->error("EmailEngine > {$e->getMessage()}");
-			$this->logger->error("EmailEngine > " . json_encode($parameters));
+		} catch (\RuntimeException) {
+			// Delivery exceptions and parameters can include recipients, message bodies, and provider secrets.
+			$this->logger->error('EmailEngine > Email delivery request failed');
 		}
 		return $response;
 	}

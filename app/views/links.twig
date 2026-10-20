@@ -24,7 +24,11 @@ ul.links-list {
 				</h1>
                 <br>
                 <h3 class="redesign-message-title tight">
+					{% if currentSongSpotify is null %}
+					Joey is not listening to any music right now!
+					{% else %}
 					Now listening to:<br><br>{{ currentSongSpotify.song }} by {{ currentSongSpotify.artist }}
+					{% endif %}
 				</h3>
 				    {% if pageLinks is not empty %}
                         <ul class="links-list">

@@ -8,6 +8,17 @@ use Slim\Psr7\Response;
 
 class PreserveInputMiddleware
 {
+	private const CONTACT_FORM_PATH_PATTERN = '#^/contact/[^/]+/?$#';
+	private const PRESERVED_FIELDS = [
+		'name',
+		'orgname',
+		'phone',
+		'email',
+		'location',
+		'what',
+		'message',
+	];
+
 	protected $container;
 
 	public function __construct($container)
@@ -17,14 +28,24 @@ class PreserveInputMiddleware
 
 	public function __invoke(Request $request, RequestHandler $handler): Response
 	{
-		$response = $handler->handle($request);
 		$twig = $this->container->get('view');
+		$oldFormData = $_SESSION['old_form_data'] ?? [];
 
-		if (isset($_SESSION['old_form_data'])) {
-			$twig->getEnvironment()->addGlobal('old_form_data', $_SESSION['old_form_data']);
+		// Treat preserved values as one-request state so a later visit cannot inherit stale contact details.
+		unset($_SESSION['old_form_data']);
+		$twig->getEnvironment()->addGlobal('old_form_data', is_array($oldFormData) ? $oldFormData : []);
+
+		if (
+			$request->getMethod() === 'POST' &&
+			preg_match(self::CONTACT_FORM_PATH_PATTERN, $request->getUri()->getPath()) === 1
+		) {
+			$parsedBody = $request->getParsedBody();
+			$parsedBody = is_array($parsedBody) ? $parsedBody : [];
+
+			// Only user-facing fields may survive the redirect; control and authentication fields stay transient.
+			$_SESSION['old_form_data'] = array_intersect_key($parsedBody, array_flip(self::PRESERVED_FIELDS));
 		}
 
-		$_SESSION['old_form_data'] = $request->getQueryParams();
-		return $response;
+		return $handler->handle($request);
 	}
 }

@@ -27,7 +27,7 @@ class Config extends Eloquent
 	// get a section from the config
 	public static function get($key = '', $default = '')
 	{
-		$entry = self::where('configuration_key', '=', $key)->first();
+		$entry = static::findByKey($key);
 
 		// return default value
 		if (is_null($entry)) {
@@ -61,17 +61,17 @@ class Config extends Eloquent
 		}
 
 		// if entry exists
-		$entry = self::where('configuration_key', '=', $key)->first();
+		$entry = static::findByKey($key);
 		if (is_null($entry)) {
+			$message = '{Config->updateSection}: No entry in the database found for an entry, please check the log for more information';
 			if ($activeLog) {
-				$message = '{Config->updateSection}: No entry in the database found for an entry, please check the log for more information';
 				$logger->error($message);
-				throw new \Exception($message, 1);
 			}
+			throw new \Exception($message, 1);
 		}
 
 		if ($activeLog) {
-			self::__logChange(__FUNCTION__, $entry->configuration_key, $entry->configuration_value, $value, $logger);
+			self::__logChange(__FUNCTION__, $entry->configuration_key, $logger);
 		}
 
 		$entry->configuration_value = $value;
@@ -89,42 +89,49 @@ class Config extends Eloquent
 		}
 
 		// update raw
-		$entry = self::where('configuration_key', '=', $key)->first();
+		$entry = static::findByKey($key);
 
 		// if entry exists
 		if (is_null($entry)) {
+			$message = '{Config->updateRaw}: No entry in the database found for an entry, please check the log for more information';
 			if ($activeLog) {
-				$message = '{Config->updateRaw}: No entry in the database found for an entry, please check the log for more information';
 				$logger->error($message);
-				throw new \Exception($message, 1);
 			}
+			throw new \Exception($message, 1);
 		}
 
 		if ($activeLog) {
-			self::__logChange(__FUNCTION__, $entry->configuration_key, $entry->configuration_value, $newValue, $logger);
+			self::__logChange(__FUNCTION__, $entry->configuration_key, $logger);
 		}
 
 		$entry->configuration_value = $newValue;
 		return $entry->save();
 	}
 
-	private static function __logChange($functionName, $key, $before, $after, $logger = null)
+	private static function __logChange($functionName, $key, $logger = null)
 	{
-		if (is_null($after)) $after = 'NULL';
-
 		if (!is_null($logger)) {
-			$logger->info("{Config->$functionName}: Config data was changed for {$key}: {$before} -> {$after}");
+			// Configuration values can contain credentials such as Spotify tokens; the key is sufficient for an audit trail.
+			$logger->info("{Config->$functionName}: Config data was changed for {$key}");
 		}
 	}
 
 	public static function getRaw($section = '', $defaultValue = '')
 	{
-		$item = self::where('configuration_key', '=', $section)->first();
+		$item = static::findByKey($section);
+		if (is_null($item)) return $defaultValue;
+
 		$returnedValue = $item->configuration_value;
 
 		// return default value
 		if (is_null($returnedValue) || $returnedValue === '') return $defaultValue;
 		return $returnedValue;
+	}
+
+	protected static function findByKey($key)
+	{
+		// Keep the shared lookup in one place so missing-row behavior stays consistent across reads and updates.
+		return static::where('configuration_key', '=', $key)->first();
 	}
 
 	public static function getArrayableData()

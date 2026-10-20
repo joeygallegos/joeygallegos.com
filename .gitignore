@@ -1,6 +1,7 @@
 *.txt
 *.zip
 *.lock
+!composer.lock
 *.psd
 /vendor/
 /mock/
@@ -41,3 +42,6 @@ bh_unicode_properties.cache
 *.env
 app/views/cache/*
 *.code-workspace
+.php.ini.codex
+.phpunit.cache/
+build/coverage/

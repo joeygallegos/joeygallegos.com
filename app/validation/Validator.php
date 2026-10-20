@@ -21,16 +21,21 @@ class Validator
 	 */
 	public function validate(Request $request, array $rules)
 	{
+		// The validator is shared by the container, so every invocation must start with an independent result.
+		$this->errors = [];
+		$parsedBody = $request->getParsedBody();
+		$parsedBody = is_array($parsedBody) ? $parsedBody : [];
+
 		foreach ($rules as $field => $config) {
 			// check request param against rule for matching param name
 			try {
-				$config['validator']->setName($config['clean_name'])->assert($request->getParsedBody()[$field]);
+				$config['validator']->setName($config['clean_name'])->assert($parsedBody[$field] ?? null);
 			} catch (NestedValidationException $e) {
 				$this->errors[$field] = $e->getMessages();
 			}
 		}
 
-		Session::set('errors', $this->errors);
+		Session::set('form_errors', $this->errors);
 		return $this;
 	}
 

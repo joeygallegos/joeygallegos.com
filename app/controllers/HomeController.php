@@ -48,20 +48,21 @@ class HomeController extends BaseController
 		// this returns a class - not array, so use accessors
 		// artists may contain more than one, so start at 0
 		// die('reached');
+		$spotify = null;
+		$currentTrack = null;
 		try {
 			$spotify = $this->container->get('spotify');
 			$currentTrack = $spotify['api']->getMyCurrentTrack();
 			// TODO: Exception when no music is playing. Null value comes forward, but function throws exception because not expected
-		} catch (\Exception $e) {
-			$this->logger->error('Exception encountered while accessing current track');
-			$this->logger->error($e);
+		} catch (\Exception) {
+			// Spotify exceptions may include request or account details, so record only the failed operation.
+			$this->logger->error('Spotify current-track request failed');
 		}
 
 		$spotifyData = null;
 		if (is_null($spotify) || is_null($currentTrack)) {
-			$this->logger->info('Spotify instance or current track data are null');
-			$this->logger->info('Spotify dump:');
-			$this->logger->debug(json_encode($spotify));
+			// The service array contains the authenticated API session and must not be serialized into logs.
+			$this->logger->info('Spotify current-track data unavailable');
 		} else {
 			$spotifyData = [
 				'song' => $currentTrack->item->name,

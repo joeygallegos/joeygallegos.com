@@ -15,15 +15,14 @@ class ValidationErrorsMiddleware
 		$this->container = $container;
 	}
 
-	// if errors is set, pass to view container
 	public function __invoke(Request $request, RequestHandler $handler): Response
 	{
-		$response = $handler->handle($request);
-		if (isset($_SESSION['form_errors'])) {
-			$this->container->view->getEnvironment()->addGlobal('form_errors', $_SESSION['form_errors']);
-		}
+		$formErrors = $_SESSION['form_errors'] ?? [];
 
+		// Errors belong only to the next request, and Twig must receive them before a route renders.
 		unset($_SESSION['form_errors']);
-		return $response;
+		$this->container->get('view')->getEnvironment()->addGlobal('form_errors', is_array($formErrors) ? $formErrors : []);
+
+		return $handler->handle($request);
 	}
 }

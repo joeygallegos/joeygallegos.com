@@ -9,8 +9,11 @@ use App\Controllers\SiteListenerController;
 use App\Middleware\FormValidation\SetFormSpam;
 use App\Middleware\FormValidation\CheckFormSpam;
 
-$app->get('/debug/', InterfaceController::class . ':getDebugPage')->setName('debug');
-$app->get('/test/', InterfaceController::class . ':getTestPage')->setName('test');
+// These diagnostic endpoints disclose operational details and must never be registered in production.
+if (in_array(getenv('ENVIRONMENT'), ['assembly', 'staging'], true)) {
+	$app->get('/debug/', InterfaceController::class . ':getDebugPage')->setName('debug');
+	$app->get('/test/', InterfaceController::class . ':getTestPage')->setName('test');
+}
 
 // ----------------------------------------------
 // HOME
@@ -43,8 +46,15 @@ $app->post('/contact/{hash}', ContactController::class . ':postContactPage')
 	->setName('contact-post')
 	->add(new CheckFormSpam($container));
 
-$app->get('/spotify', SpotifyController::class . ':getSpotifyAuth')
-	->setName('spotify-get');
+// Spotify authorization is an operator-only maintenance flow. Staging must also
+// have access controls outside the application whenever this explicit opt-in is enabled.
+if (
+	in_array(getenv('ENVIRONMENT'), ['assembly', 'staging'], true) &&
+	getenv('SPOTIFY_AUTH_ENABLED') === 'true'
+) {
+	$app->get('/spotify', SpotifyController::class . ':getSpotifyAuth')
+		->setName('spotify-get');
+}
 
 $app->get('/api/listen', SiteListenerController::class . ':getResponseFromSite')
 	->setName('api-site-listen-get');

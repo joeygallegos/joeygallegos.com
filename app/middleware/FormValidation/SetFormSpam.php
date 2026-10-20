@@ -52,7 +52,8 @@ class SetFormSpam implements \Psr\Http\Server\MiddlewareInterface
 		// which redirects to the route
 		// which expects some random value and will check if exists in session
 		Session::set(self::FORM_OBFUSCATION_SESSION_NAME, $this->obfuscationHash);
-		$this->logger->info(sprintf('SetFormSpam %s set = %s', self::FORM_OBFUSCATION_SESSION_NAME, $this->obfuscationHash));
+		// The hash is a form-submission credential; log its lifecycle without retaining its value.
+		$this->logger->info('SetFormSpam initialized form obfuscation state');
 
 		// to execute this middleware before the route code
 		// all logic must be BEFORE this handle method is called

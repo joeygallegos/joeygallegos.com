@@ -2,51 +2,75 @@
 
 namespace App\Controllers;
 
-use Slim\Container;
-use App\Models\Config;
-use Slim\Http\Request;
-use Slim\Http\Response;
 use App\Controllers\BaseController;
+use DI\Container;
+use Slim\Psr7\Request;
+use Slim\Psr7\Response;
 
 class SiteListenerController extends BaseController
 {
 	protected $container;
-	protected $logger;
+
 	public function __construct(Container $container)
 	{
 		$this->container = $container;
-		$this->logger = $this->container->debugLogger;
 	}
 
 	public function getResponseFromSite(Request $request, Response $response, array $args)
 	{
-		$siteToken = $request->getParam('token');
-
-		if (isNullOrEmptyString($siteToken)) {
-			$this->log('info', __FUNCTION__, sprintf('Failed attempt from siteToken %s', $siteToken));
-			return $response->withJson([
+		$allowedTokens = $this->getAllowedTokens();
+		if ($allowedTokens === []) {
+			// Fail closed when deployment configuration is absent instead of accepting any caller.
+			return $this->responseWithJson($request, $response, [
 				'error' => [
-					'code' => 400,
-					'message' => 'The site token was not provided'
+					'code' => 503,
+					'message' => 'The site listener is unavailable'
 				]
-			], 400);
+			], 503);
 		}
 
-		if (!in_array($siteToken, ['db8de3bd-3b51-447d-b099-44ae0c111e7f', 'f32eb393-8390-4d21-8b3a-9105eb8adc3b', 'f2ac2149-a975-4ea4-b71a-469fb70212ea'])) {
-			return $response->withJson([
+		$authorization = $request->getHeaderLine('Authorization');
+		// Reject whitespace and combined credentials so exactly one opaque Bearer token is authenticated.
+		if (!preg_match('/^Bearer ([^\s,]+)$/i', $authorization, $matches) || !$this->tokenIsAllowed($matches[1], $allowedTokens)) {
+			// All authentication failures deliberately share one response so callers cannot probe valid credentials.
+			return $this->responseWithJson($request, $response, [
 				'error' => [
-					'code' => 400,
-					'message' => 'The site token is not registered in the listener'
+					'code' => 401,
+					'message' => 'Authentication required'
 				]
-			], 400);
+			], 401)->withHeader('WWW-Authenticate', 'Bearer');
 		}
 
-		$payload = [
+		return $this->responseWithJson($request, $response, [
 			'success' => [
 				'code' => 200,
-				'message' => sprintf('You are using %s', $siteToken)
+				'message' => 'The site listener is available'
 			]
-		];
-		return $response->withJson($payload, 200);
+		], 200);
+	}
+
+	private function getAllowedTokens(): array
+	{
+		$configuredTokens = getenv('SITE_LISTENER_TOKENS');
+		if ($configuredTokens === false) {
+			return [];
+		}
+
+		// Trimming supports a readable comma-separated setting; empty entries never become valid credentials.
+		return array_values(array_filter(
+			array_map('trim', explode(',', $configuredTokens)),
+			static fn (string $token): bool => $token !== ''
+		));
+	}
+
+	private function tokenIsAllowed(string $providedToken, array $allowedTokens): bool
+	{
+		$isAllowed = false;
+		foreach ($allowedTokens as $allowedToken) {
+			// Evaluate every configured token to avoid revealing its position through an early return.
+			$isAllowed = hash_equals($allowedToken, $providedToken) || $isAllowed;
+		}
+
+		return $isAllowed;
 	}
 }
