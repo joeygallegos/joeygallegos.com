@@ -22,7 +22,6 @@
 		"php-http/curl-client": "^2.3",
 		"guzzlehttp/psr7": "^3.0",
 		"jwilsson/spotify-web-api-php": "^7.2",
-		"calebporzio/sushi": "^2.1",
 		"slim/psr7": "^1.5",
 		"slim/twig-view": "^3.2",
 		"php-di/php-di": "^7.1"
